@@ -1,0 +1,8 @@
+{
+    "vscode-color-picker.languages": [
+        "python",
+        "javascript",
+        "typescript",
+        "typescriptreact",
+    ]
+}

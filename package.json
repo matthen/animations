@@ -1,0 +1,54 @@
+{
+  "name": "smoothstep",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.59",
+    "@types/react": "^18.2.30",
+    "@types/react-dom": "^18.2.14",
+    "chroma-js": "^2.4.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.11.0",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.9.5",
+    "use-debounce": "^9.0.4",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
+    "@types/chroma-js": "^2.4.2",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "prettier-plugin-tailwindcss": "^0.5.6",
+    "tailwind-dracula": "^1.1.0",
+    "tailwindcss": "^3.3.3"
+  }
+}
