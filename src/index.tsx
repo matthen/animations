@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Link, RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import Hypocycloids from './animations/hypocycloids';
 import './index.css';
@@ -20,9 +20,9 @@ const AnimationList = () => {
             <ul className="list-inside list-disc pt-2 ">
                 {animations.map((animation) => (
                     <li key={animation.name}>
-                        <a href={`/${animation.name}`} className="text-pink hover:text-pink-200 hover:underline">
+                        <Link to={`/${animation.name}`} className="text-pink hover:text-pink-200 hover:underline">
                             {animation.name}
-                        </a>
+                        </Link>
                     </li>
                 ))}
             </ul>
@@ -30,18 +30,21 @@ const AnimationList = () => {
     );
 };
 
-const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <AnimationList />,
-    },
-    ...animations.map((animation) => {
-        return {
-            path: `/${animation.name}`,
-            element: <animation.component />,
-        };
-    }),
-]);
+const router = createBrowserRouter(
+    [
+        {
+            path: '/',
+            element: <AnimationList />,
+        },
+        ...animations.map((animation) => {
+            return {
+                path: `/${animation.name}`,
+                element: <animation.component />,
+            };
+        }),
+    ],
+    { basename: '/smoothstep' },
+);
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
