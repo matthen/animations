@@ -191,7 +191,7 @@ export const Animation = (props: AnimationOptions) => {
                     </div>
                 </div>
                 {/* controls */}
-                <div className="flex h-full flex-col gap-2 py-4" style={{ minWidth: 512 }}>
+                <div className="flex h-full w-full flex-col gap-2 py-4" style={{ maxWidth: '512px' }}>
                     <p className={controlMode == 'playing' ? 'text-light' : 'text-neutral-400'}>{fps.toFixed(2)} fps</p>
                     <div className="flex flex-row gap-2">
                         <button
