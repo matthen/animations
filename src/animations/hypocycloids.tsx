@@ -12,10 +12,10 @@ const Hypocycloids = () => {
             name: 'theta',
             minValue: 0,
             maxValue: 4 * Math.PI,
-            // Start and end at 4 * Math.PI, linear between 2 and duration - 2 seconds.
+            // Start and end at 4 * Math.PI, linear between 4 and duration - 4 seconds.
             compute: (t) =>
-                (4 * Math.PI * (Utils.smoothstepI(t, 0, 2) - Utils.smoothstepI(t, duration - 2, duration))) /
-                (duration - 2),
+                (4 * Math.PI * (Utils.smoothstepI(t, 0, 4) - Utils.smoothstepI(t, duration - 4, duration))) /
+                (duration - 4),
             step: 0.01,
         },
         {
