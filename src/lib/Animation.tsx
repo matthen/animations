@@ -175,130 +175,126 @@ export const Animation = (props: AnimationOptions) => {
 
     return (
         <IconContext.Provider value={{ style: { verticalAlign: 'middle', display: 'inline' } }}>
-            <div className="min-h-screen bg-darker p-4 text-light">
-                <div className="flex flex-row flex-wrap gap-4 ">
-                    {/* canvas */}
-                    <div className="">
-                        <div className="bg-black">
-                            <canvas
-                                width={props.canvasWidth}
-                                height={props.canvasHeight}
-                                style={{
-                                    width: props.canvasWidth / pixelRatio,
-                                    height: props.canvasHeight / pixelRatio,
-                                }}
-                                ref={setupCanvas}
-                            />
-                        </div>
+            <div className="flex flex-row flex-wrap gap-4 ">
+                {/* canvas */}
+                <div className="">
+                    <div className="bg-black">
+                        <canvas
+                            width={props.canvasWidth}
+                            height={props.canvasHeight}
+                            style={{
+                                width: props.canvasWidth / pixelRatio,
+                                height: props.canvasHeight / pixelRatio,
+                            }}
+                            ref={setupCanvas}
+                        />
                     </div>
-                    {/* controls */}
-                    <div className="flex h-full flex-col gap-2 py-4" style={{ minWidth: 512 }}>
-                        <p className={controlMode == 'playing' ? 'text-light' : 'text-neutral-400'}>
-                            {fps.toFixed(2)} fps
-                        </p>
-                        <div className="flex flex-row gap-2">
+                </div>
+                {/* controls */}
+                <div className="flex h-full flex-col gap-2 py-4" style={{ minWidth: 512 }}>
+                    <p className={controlMode == 'playing' ? 'text-light' : 'text-neutral-400'}>{fps.toFixed(2)} fps</p>
+                    <div className="flex flex-row gap-2">
+                        <button
+                            className="rounded bg-dark px-2 py-1 text-light hover:bg-dark-600 disabled:text-neutral-400 disabled:hover:bg-dark"
+                            onClick={() => onClickRecord()}
+                            disabled={controlMode == 'recording'}
+                        >
+                            export
+                        </button>
+                        {controlMode == 'recording' && (
                             <button
-                                className="rounded bg-dark px-2 py-1 text-light hover:bg-dark-600 disabled:text-neutral-400 disabled:hover:bg-dark"
-                                onClick={() => onClickRecord()}
+                                className="rounded bg-dark px-2 py-1 text-light hover:bg-dark-600 "
+                                onClick={() => onClickCancelRecord()}
+                            >
+                                cancel
+                            </button>
+                        )}
+                    </div>
+                    <div className="grid grid-cols-8 gap-2">
+                        <div className="col-span-1 pr-2 text-right">
+                            <button
+                                className="text-light-200 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
+                                onClick={() => onClickPlayPause()}
                                 disabled={controlMode == 'recording'}
                             >
-                                export
+                                {controlMode == 'playing' ? <FaPause /> : <FaPlay />}
                             </button>
-                            {controlMode == 'recording' && (
-                                <button
-                                    className="rounded bg-dark px-2 py-1 text-light hover:bg-dark-600 "
-                                    onClick={() => onClickCancelRecord()}
-                                >
-                                    cancel
-                                </button>
-                            )}
                         </div>
-                        <div className="grid grid-cols-8 gap-2">
-                            <div className="col-span-1 pr-2 text-right">
-                                <button
-                                    className="text-light-200 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
-                                    onClick={() => onClickPlayPause()}
-                                    disabled={controlMode == 'recording'}
-                                >
-                                    {controlMode == 'playing' ? <FaPause /> : <FaPlay />}
-                                </button>
-                            </div>
-                            <div className="col-span-5">
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max={props.duration}
-                                    value={drawArgsUI.t}
-                                    step={0.01}
-                                    disabled={controlMode != 'user'}
-                                    className="h-2 w-full appearance-none rounded-lg bg-dark accent-pink"
-                                    onChange={(e) =>
-                                        setDrawArgsUI((old) => {
-                                            return {
-                                                ...old,
-                                                t: Number(e.target.value),
-                                                ...computeParamValues(Number(e.target.value)),
-                                            };
-                                        })
-                                    }
-                                />
-                            </div>
-                            <div className="col-span-2">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max={props.duration}
-                                    value={Math.round(drawArgsUI.t * 100) / 100}
-                                    step={0.01}
-                                    disabled={controlMode != 'user'}
-                                    className="ml-2 w-20 appearance-none rounded bg-dark px-2 py-1"
-                                    onChange={(e) =>
-                                        setDrawArgsUI((old) => {
-                                            return {
-                                                ...old,
-                                                t: Number(e.target.value),
-                                                ...computeParamValues(Number(e.target.value)),
-                                            };
-                                        })
-                                    }
-                                />
-                            </div>
-                            {props.parameters.map((param) => (
-                                <React.Fragment key={param.name}>
-                                    <div className="col-span-1 mt-1 pr-2 text-right text-sm">
-                                        <p>{param.name}</p>
-                                    </div>
-                                    <div className="col-span-5">
-                                        <input
-                                            type="range"
-                                            min={param.minValue}
-                                            max={param.maxValue}
-                                            value={drawArgsUI[param.name]}
-                                            step={param.step || 0.01}
-                                            disabled={param.compute && controlMode != 'user'}
-                                            className="h-2 w-full appearance-none rounded-lg bg-dark accent-pink"
-                                            onChange={(e) => {
-                                                setParam(e, param);
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="col-span-2">
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            max={drawArgsUI[param.name]}
-                                            value={Math.round(drawArgsUI[param.name] * 100) / 100}
-                                            step={param.step || 0.01}
-                                            disabled={param.compute && controlMode != 'user'}
-                                            className="ml-2 w-20 appearance-none rounded bg-dark px-2 py-1"
-                                            onChange={(e) => {
-                                                setParam(e, param);
-                                            }}
-                                        />
-                                    </div>
-                                </React.Fragment>
-                            ))}
+                        <div className="col-span-5">
+                            <input
+                                type="range"
+                                min="0"
+                                max={props.duration}
+                                value={drawArgsUI.t}
+                                step={0.01}
+                                disabled={controlMode != 'user'}
+                                className="h-2 w-full appearance-none rounded-lg bg-dark accent-pink"
+                                onChange={(e) =>
+                                    setDrawArgsUI((old) => {
+                                        return {
+                                            ...old,
+                                            t: Number(e.target.value),
+                                            ...computeParamValues(Number(e.target.value)),
+                                        };
+                                    })
+                                }
+                            />
                         </div>
+                        <div className="col-span-2">
+                            <input
+                                type="number"
+                                min="0"
+                                max={props.duration}
+                                value={Math.round(drawArgsUI.t * 100) / 100}
+                                step={0.01}
+                                disabled={controlMode != 'user'}
+                                className="ml-2 w-20 appearance-none rounded bg-dark px-2 py-1"
+                                onChange={(e) =>
+                                    setDrawArgsUI((old) => {
+                                        return {
+                                            ...old,
+                                            t: Number(e.target.value),
+                                            ...computeParamValues(Number(e.target.value)),
+                                        };
+                                    })
+                                }
+                            />
+                        </div>
+                        {props.parameters.map((param) => (
+                            <React.Fragment key={param.name}>
+                                <div className="col-span-1 mt-1 pr-2 text-right text-sm">
+                                    <p>{param.name}</p>
+                                </div>
+                                <div className="col-span-5">
+                                    <input
+                                        type="range"
+                                        min={param.minValue}
+                                        max={param.maxValue}
+                                        value={drawArgsUI[param.name]}
+                                        step={param.step || 0.01}
+                                        disabled={param.compute && controlMode != 'user'}
+                                        className="h-2 w-full appearance-none rounded-lg bg-dark accent-pink"
+                                        onChange={(e) => {
+                                            setParam(e, param);
+                                        }}
+                                    />
+                                </div>
+                                <div className="col-span-2">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max={drawArgsUI[param.name]}
+                                        value={Math.round(drawArgsUI[param.name] * 100) / 100}
+                                        step={param.step || 0.01}
+                                        disabled={param.compute && controlMode != 'user'}
+                                        className="ml-2 w-20 appearance-none rounded bg-dark px-2 py-1"
+                                        onChange={(e) => {
+                                            setParam(e, param);
+                                        }}
+                                    />
+                                </div>
+                            </React.Fragment>
+                        ))}
                     </div>
                 </div>
             </div>

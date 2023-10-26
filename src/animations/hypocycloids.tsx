@@ -2,7 +2,7 @@ import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animatio
 import Graphics from 'lib/graphics';
 import Utils from 'lib/utils';
 
-const App = () => {
+const Hypocycloids = () => {
     const duration = 10;
     const canvasWidth = 1024;
     const canvasHeight = 1024;
@@ -33,45 +33,67 @@ const App = () => {
         const drawFn: DrawFn = ({ theta, n }: DrawArgs) => {
             const r = 1 / n;
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            ctx.fillStyle = '#000000';
+            ctx.fillStyle = '#020115';
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
             const inFirstHalf = theta < 2 * Math.PI;
-            const traceFn = (th: number) => [
+            const traceInFn = (th: number) => [
                 Math.sin(th) * (1 - r) - Math.sin((th * (1 - r)) / r) * r,
                 Math.cos(th) * (1 - r) + Math.cos((th * (1 - r)) / r) * r,
             ];
+            const traceOutFn = (th: number) => [
+                Math.sin(th) * (1 + r) - Math.sin((th * (1 + r)) / r) * r,
+                Math.cos(th) * (1 + r) - Math.cos((th * (1 + r)) / r) * r,
+            ];
+            const plotRange = 1 + 2 * r + 0.1;
             Graphics.draw(
                 [
                     Graphics.AbsoluteLineWidth(4),
                     Graphics.Set({ strokeStyle: '#ffffff' }),
                     Graphics.Disk({ center: [0, 0], radius: 1, fill: false, edge: true }),
                     [
-                        // Trace
                         Graphics.Set({ strokeStyle: '#bbeafe' }),
+                        // Trace inside.
                         Graphics.Line({
                             pts: Utils.range(inFirstHalf ? 0 : 4 * Math.PI, theta, inFirstHalf ? 0.01 : -0.01).map(
-                                traceFn,
+                                traceInFn,
+                            ),
+                        }),
+                        // Trace outside.
+                        Graphics.Line({
+                            pts: Utils.range(inFirstHalf ? 0 : 4 * Math.PI, theta, inFirstHalf ? 0.01 : -0.01).map(
+                                traceOutFn,
                             ),
                         }),
                     ],
 
                     [
                         Graphics.Rotate({ angle: theta, center: [0, 0] }),
-                        // Rolling circle.
+                        // Rolling circles.
                         Graphics.Set({ fillStyle: '#ffffff16' }),
-                        Graphics.Disk({ center: [0, 1 - r], radius: r, fill: true, edge: true }),
-                        Graphics.Rotate({ angle: -theta / r, center: [0, 1 - r] }),
-                        // Point on rolling circle.
-                        Graphics.Set({ fillStyle: '#75fffa', strokeStyle: 'black' }),
-                        Graphics.Disk({ center: [0, 1], radius: 0.03, fill: true, edge: true }),
+                        [
+                            // inside
+                            Graphics.Disk({ center: [0, 1 - r], radius: r, fill: true, edge: true }),
+                            Graphics.Rotate({ angle: -theta / r, center: [0, 1 - r] }),
+                            // Point on rolling circle.
+                            Graphics.Set({ fillStyle: '#ffd876', strokeStyle: 'black' }),
+                            Graphics.Disk({ center: [0, 1], radius: 0.03, fill: true, edge: true }),
+                        ],
+                        [
+                            // outside
+                            Graphics.Disk({ center: [0, 1 + r], radius: r, fill: true, edge: true }),
+                            Graphics.Rotate({ angle: theta / r, center: [0, 1 + r] }),
+                            // Point on rolling circle.
+                            Graphics.Set({ fillStyle: '#ffd876', strokeStyle: 'black' }),
+                            Graphics.Disk({ center: [0, 1], radius: 0.03, fill: true, edge: true }),
+                        ],
                     ],
                 ],
 
                 {
-                    xmin: -1.1,
-                    xmax: 1.1,
-                    ymin: -1.1,
-                    ymax: 1.1,
+                    xmin: -plotRange,
+                    xmax: plotRange,
+                    ymin: -plotRange,
+                    ymax: plotRange,
                 },
                 ctx,
             );
@@ -91,4 +113,4 @@ const App = () => {
     );
 };
 
-export default App;
+export default Hypocycloids;
