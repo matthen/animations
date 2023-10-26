@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Link, RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Link, RouterProvider, createHashRouter } from 'react-router-dom';
 
 import Hypocycloids from './animations/hypocycloids';
 import './index.css';
@@ -30,21 +30,18 @@ const AnimationList = () => {
     );
 };
 
-const router = createBrowserRouter(
-    [
-        {
-            path: '/',
-            element: <AnimationList />,
-        },
-        ...animations.map((animation) => {
-            return {
-                path: `/${animation.name}`,
-                element: <animation.component />,
-            };
-        }),
-    ],
-    { basename: '/smoothstep' },
-);
+const router = createHashRouter([
+    {
+        path: '/',
+        element: <AnimationList />,
+    },
+    ...animations.map((animation) => {
+        return {
+            path: `/${animation.name}`,
+            element: <animation.component />,
+        };
+    }),
+]);
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
