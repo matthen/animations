@@ -72,7 +72,10 @@ const PiArcs = () => {
                 [oddOpacity, evenOpacity] = [evenOpacity, oddOpacity];
             }
 
-            let arcStyles = [Graphics.Set({ strokeStyle: '#ff36e8af', lineWidth: 0.07 })];
+            let arcStyles = [
+                Graphics.Set({ strokeStyle: '#ff36e8af' }),
+                Graphics.Set({ lineWidth: 0.06 * Math.pow(zoom / 2.4, 0.6) }),
+            ];
             let transformsAndPreviousArcs: Graphics.DrawCommand[] = [];
             for (let i = 0; i < index; i++) {
                 const digitI = Number(Utils.piDigits[i]);
