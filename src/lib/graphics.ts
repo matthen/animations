@@ -143,10 +143,11 @@ namespace Graphics {
         depth?: number,
     ): void => {
         if (Array.isArray(commands)) {
+            if (commands.length == 0) {
+                return;
+            }
             ctx.save();
-
             // compute scale and translation
-
             if (depth === undefined) {
                 ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
                 ctx.scale(

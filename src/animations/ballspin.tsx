@@ -10,7 +10,7 @@ const Ballspin = () => {
     const canvasHeight = 1024;
     const bgColor = '#020115';
 
-    const parameters: Parameter[] = [];
+    const parameters: Parameter[] = [{ name: 'ground', minValue: 0, maxValue: 1, defaultValue: 0, step: 1.0 }];
 
     const makeDrawFn: MakeDrawFn = (canvas) => {
         const ctx = canvas.getContext('2d')!;
@@ -20,7 +20,7 @@ const Ballspin = () => {
         engine.gravity = { x: 0, y: -1, scale: 300.0 };
         const ballInitParams = {
             x: plotRange / 2,
-            y: 300,
+            y: 0.75 * plotRange,
             vx: 1200,
             vy: 1000,
             angle: 0,
@@ -28,33 +28,28 @@ const Ballspin = () => {
         };
         const ballSpin = Matter.Bodies.circle(ballInitParams.x, ballInitParams.y, 20, {
             restitution: 0.99,
-            friction: 0.2,
-            density: 0.1,
-            frictionStatic: 10.0,
             collisionFilter: { mask: 2, category: 1 },
         });
         const ballNoSpin = Matter.Bodies.circle(ballInitParams.x, ballInitParams.y, 20, {
             restitution: 0.99,
-            friction: 0.2,
-            density: 0.1,
-            frictionStatic: 10.0,
-            //  inertia: Infinity,
             collisionFilter: { mask: 2, category: 1 },
         });
-        const numPieces = 40;
+        const numPieces = 64;
         const radius = (0.9 * plotRange) / 2;
-        const groundPieces = Utils.range(0, Math.PI + 1e-6, Math.PI / (numPieces - 1)).map((th) =>
-            Matter.Bodies.rectangle(
-                plotRange / 2 - radius * Math.cos(th),
-                plotRange / 2 - radius * Math.sin(th),
-                6,
-                (2 * (Math.PI * radius)) / numPieces,
-                {
-                    isStatic: true,
-                    angle: th,
-                    collisionFilter: { category: 2, mask: 1 },
-                },
-            ),
+        const overhang = 1.0;
+        const groundPieces = Utils.range(-overhang, overhang + Math.PI, (Math.PI + 2 * overhang) / (numPieces - 1)).map(
+            (th) =>
+                Matter.Bodies.rectangle(
+                    plotRange / 2 - radius * Math.cos(th),
+                    plotRange / 2 - radius * Math.sin(th),
+                    6,
+                    (2 * (Math.PI * radius)) / numPieces,
+                    {
+                        isStatic: true,
+                        angle: th,
+                        collisionFilter: { category: 2, mask: 1 },
+                    },
+                ),
         );
 
         Matter.World.add(engine.world, [ballSpin, ballNoSpin, ...groundPieces]);
@@ -87,7 +82,7 @@ const Ballspin = () => {
         let trace1: number[][] = [];
         let trace2: number[][] = [];
 
-        const drawFn: DrawFn = ({ t }: DrawArgs) => {
+        const drawFn: DrawFn = ({ t, ground }: DrawArgs) => {
             if (t == 0.0) {
                 initBall(ballSpin, 0);
                 initBall(ballNoSpin, 0.1);
@@ -97,10 +92,14 @@ const Ballspin = () => {
             const deltaT = t - lastT;
             lastT = t;
             if (deltaT > 0 && deltaT < 0.1) {
-                Matter.Engine.update(engine, deltaT / 2);
-                Matter.Engine.update(engine, deltaT / 2);
-                trace1.push([ballNoSpin.position.x, ballNoSpin.position.y]);
-                trace2.push([ballSpin.position.x, ballSpin.position.y]);
+                const deltaT2 = deltaT / 12;
+                for (let i = 0; i < 12; i++) {
+                    Matter.Engine.update(engine, deltaT2);
+                    if (i % 4 == 0) {
+                        trace1.push([ballNoSpin.position.x, ballNoSpin.position.y]);
+                        trace2.push([ballSpin.position.x, ballSpin.position.y]);
+                    }
+                }
             }
 
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -117,9 +116,15 @@ const Ballspin = () => {
                     // ground
                     Graphics.Set({ fillStyle: '#ff000062', strokeStyle: '#ffffffff', lineWidth: 6 }),
                     Graphics.Disk({ center: [plotRange / 2, plotRange / 2], radius, fill: false, edge: true }),
-                    // groundPieces.map((ground) =>
-                    //     Graphics.Polygon({ pts: ground.vertices.map((pt) => [pt.x, pt.y]), edge: false, fill: true }),
-                    // ),
+                    ground > 0.5
+                        ? groundPieces.map((ground) =>
+                              Graphics.Polygon({
+                                  pts: ground.vertices.map((pt) => [pt.x, pt.y]),
+                                  edge: false,
+                                  fill: true,
+                              }),
+                          )
+                        : [],
                 ],
 
                 {
