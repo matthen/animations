@@ -26,11 +26,11 @@ const Ballspin = () => {
             angle: 0,
             angularVelocity: 0.0,
         };
-        const ballSpin = Matter.Bodies.circle(ballInitParams.x, ballInitParams.y, 20, {
+        const ball1 = Matter.Bodies.circle(ballInitParams.x, ballInitParams.y, 20, {
             restitution: 0.99,
             collisionFilter: { mask: 2, category: 1 },
         });
-        const ballNoSpin = Matter.Bodies.circle(ballInitParams.x, ballInitParams.y, 20, {
+        const ball2 = Matter.Bodies.circle(ballInitParams.x, ballInitParams.y, 20, {
             restitution: 0.99,
             collisionFilter: { mask: 2, category: 1 },
         });
@@ -52,7 +52,7 @@ const Ballspin = () => {
                 ),
         );
 
-        Matter.World.add(engine.world, [ballSpin, ballNoSpin, ...groundPieces]);
+        Matter.World.add(engine.world, [ball1, ball2, ...groundPieces]);
         let lastT = 0.0;
 
         const ballGraphics = (ball: Matter.Body) => [
@@ -84,8 +84,8 @@ const Ballspin = () => {
 
         const drawFn: DrawFn = ({ t, ground }: DrawArgs) => {
             if (t == 0.0) {
-                initBall(ballSpin, 0);
-                initBall(ballNoSpin, 0.1);
+                initBall(ball1, 0);
+                initBall(ball2, 0.1);
                 trace1 = [];
                 trace2 = [];
             }
@@ -96,8 +96,8 @@ const Ballspin = () => {
                 for (let i = 0; i < 12; i++) {
                     Matter.Engine.update(engine, deltaT2);
                     if (i % 4 == 0) {
-                        trace1.push([ballNoSpin.position.x, ballNoSpin.position.y]);
-                        trace2.push([ballSpin.position.x, ballSpin.position.y]);
+                        trace1.push([ball2.position.x, ball2.position.y]);
+                        trace2.push([ball1.position.x, ball1.position.y]);
                     }
                 }
             }
@@ -111,8 +111,8 @@ const Ballspin = () => {
                     Graphics.AbsoluteLineWidth(4),
                     [Graphics.Set({ strokeStyle: '#985e00ff' }), Graphics.Line({ pts: trace1 })],
                     [Graphics.Set({ strokeStyle: '#5290a5ff' }), Graphics.Line({ pts: trace2 })],
-                    [Graphics.Set({ fillStyle: '#7dddfca0', strokeStyle: bgColor }), ballGraphics(ballSpin)],
-                    [Graphics.Set({ fillStyle: '#ff9d00b5', strokeStyle: bgColor }), ballGraphics(ballNoSpin)],
+                    [Graphics.Set({ fillStyle: '#7dddfca0', strokeStyle: bgColor }), ballGraphics(ball1)],
+                    [Graphics.Set({ fillStyle: '#ff9d00b5', strokeStyle: bgColor }), ballGraphics(ball2)],
                     // ground
                     Graphics.Set({ fillStyle: '#ff000062', strokeStyle: '#ffffffff', lineWidth: 6 }),
                     Graphics.Disk({ center: [plotRange / 2, plotRange / 2], radius, fill: false, edge: true }),

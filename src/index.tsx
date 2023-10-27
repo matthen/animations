@@ -1,4 +1,5 @@
 import Ballspin from 'animations/ballspin';
+import PiArcs from 'animations/piArcs';
 import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { FaArrowLeft } from 'react-icons/fa';
@@ -16,6 +17,10 @@ const animations = [
     {
         name: 'ballspin',
         component: Ballspin,
+    },
+    {
+        name: 'piArcs',
+        component: PiArcs,
     },
 ];
 

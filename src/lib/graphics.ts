@@ -1,5 +1,5 @@
 namespace Graphics {
-    type DrawCommand = (ctx: CanvasRenderingContext2D) => void;
+    export type DrawCommand = (ctx: CanvasRenderingContext2D) => void;
 
     type CanvasState = {
         strokeStyle: string;
@@ -49,6 +49,7 @@ namespace Graphics {
         edge,
         startAngle = 0,
         endAngle = 2 * Math.PI,
+        sector = true,
     }: {
         center: number[];
         radius: number;
@@ -56,6 +57,7 @@ namespace Graphics {
         edge: boolean;
         startAngle?: number;
         endAngle?: number;
+        sector?: boolean;
     }): DrawCommand => {
         return (ctx) => {
             if (!fill && !edge) {
@@ -66,7 +68,13 @@ namespace Graphics {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0)';
             }
             ctx.beginPath();
+            if (sector) {
+                ctx.moveTo(center[0], center[1]);
+            }
             ctx.arc(center[0], -center[1], radius, startAngle, endAngle);
+            if (sector) {
+                ctx.moveTo(center[0], center[1]);
+            }
             ctx.fill();
             if (edge) {
                 ctx.stroke();
@@ -107,6 +115,13 @@ namespace Graphics {
             ctx.moveTo(x0, -y0);
             pts.forEach(([x, y]) => ctx.lineTo(x, -y));
             ctx.stroke();
+        };
+    };
+
+    export const Text = ({ at, text }: { at: number[]; text: string }): DrawCommand => {
+        return (ctx) => {
+            const [x, y] = at;
+            ctx.fillText(text, x, -y);
         };
     };
 
