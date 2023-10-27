@@ -1,5 +1,7 @@
-import React from 'react';
+import Ballspin from 'animations/ballspin';
+import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
+import { FaArrowLeft } from 'react-icons/fa';
 import { Link, RouterProvider, createHashRouter } from 'react-router-dom';
 
 import Hypocycloids from './animations/hypocycloids';
@@ -10,6 +12,10 @@ const animations = [
     {
         name: 'hypocycloids',
         component: Hypocycloids,
+    },
+    {
+        name: 'ballspin',
+        component: Ballspin,
     },
 ];
 
@@ -30,6 +36,19 @@ const AnimationList = () => {
     );
 };
 
+const ViewAnimation = ({ children }: { children: ReactNode }) => {
+    return (
+        <div>
+            <p className="mb-2">
+                <Link to="/" className="text-sm text-neutral-400 hover:text-white">
+                    <FaArrowLeft className="mb-1 mr-1 inline " /> all animations
+                </Link>
+            </p>
+            {children}
+        </div>
+    );
+};
+
 const router = createHashRouter([
     {
         path: '/',
@@ -38,7 +57,11 @@ const router = createHashRouter([
     ...animations.map((animation) => {
         return {
             path: `/${animation.name}`,
-            element: <animation.component />,
+            element: (
+                <ViewAnimation>
+                    <animation.component />
+                </ViewAnimation>
+            ),
         };
     }),
 ]);

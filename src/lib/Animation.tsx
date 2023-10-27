@@ -1,9 +1,9 @@
 import React from 'react';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { IconContext } from 'react-icons';
-import { FaPause, FaPlay } from 'react-icons/fa';
+import { FaPause, FaPlay, FaStepBackward } from 'react-icons/fa';
 
-export type DrawArgs = Record<string, number>;
+export type DrawArgs = Record<string, number> & { t: number };
 export type DrawFn = (args: DrawArgs) => void;
 export type MakeDrawFn = (canvas: HTMLCanvasElement) => DrawFn;
 export interface Parameter {
@@ -22,9 +22,11 @@ interface AnimationOptions {
     pixelRatio?: number;
     makeDrawFn: MakeDrawFn;
     parameters: Parameter[];
+    enableTimeControl?: boolean;
 }
 
 export const Animation = (props: AnimationOptions) => {
+    const enableTimeControl = props.enableTimeControl === undefined ? true : props.enableTimeControl;
     const [drawFn, setDrawFn] = useState<DrawFn | null>(null);
     const [controlMode, setControlMode] = useState('user' as 'playing' | 'user' | 'recording');
     const computeParamValues = (t: number): Record<string, number> =>
@@ -149,6 +151,13 @@ export const Animation = (props: AnimationOptions) => {
         }
     }, [controlMode]);
 
+    const onClickReset = useCallback(() => {
+        if (controlMode == 'playing') {
+            setControlMode('user');
+        }
+        setDrawArgsUI((old) => ({ ...old, t: 0.0, ...computeParamValues(0) }));
+    }, [controlMode]);
+
     const onClickRecord = useCallback(() => {
         setControlMode('recording');
     }, []);
@@ -213,6 +222,13 @@ export const Animation = (props: AnimationOptions) => {
                     <div className="grid grid-cols-8 gap-2">
                         <div className="col-span-1 pr-2 text-right">
                             <button
+                                className="mr-2 text-light-200 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
+                                onClick={() => onClickReset()}
+                                disabled={controlMode == 'recording'}
+                            >
+                                <FaStepBackward />
+                            </button>
+                            <button
                                 className="text-light-200 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
                                 onClick={() => onClickPlayPause()}
                                 disabled={controlMode == 'recording'}
@@ -227,7 +243,7 @@ export const Animation = (props: AnimationOptions) => {
                                 max={props.duration}
                                 value={drawArgsUI.t}
                                 step={0.01}
-                                disabled={controlMode != 'user'}
+                                disabled={controlMode != 'user' || !enableTimeControl}
                                 className="h-2 w-full appearance-none rounded-lg bg-dark accent-pink"
                                 onChange={(e) =>
                                     setDrawArgsUI((old) => {
@@ -247,7 +263,7 @@ export const Animation = (props: AnimationOptions) => {
                                 max={props.duration}
                                 value={Math.round(drawArgsUI.t * 100) / 100}
                                 step={0.01}
-                                disabled={controlMode != 'user'}
+                                disabled={controlMode != 'user' || !enableTimeControl}
                                 className="ml-2 w-20 appearance-none rounded bg-dark px-2 py-1"
                                 onChange={(e) =>
                                     setDrawArgsUI((old) => {

@@ -47,11 +47,15 @@ namespace Graphics {
         radius,
         fill,
         edge,
+        startAngle = 0,
+        endAngle = 2 * Math.PI,
     }: {
         center: number[];
         radius: number;
         fill: boolean;
         edge: boolean;
+        startAngle?: number;
+        endAngle?: number;
     }): DrawCommand => {
         return (ctx) => {
             if (!fill && !edge) {
@@ -62,7 +66,7 @@ namespace Graphics {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0)';
             }
             ctx.beginPath();
-            ctx.arc(center[0], -center[1], radius, 0, 2 * Math.PI);
+            ctx.arc(center[0], -center[1], radius, startAngle, endAngle);
             ctx.fill();
             if (edge) {
                 ctx.stroke();
