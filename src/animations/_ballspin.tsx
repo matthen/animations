@@ -1,3 +1,4 @@
+// Kept for reference. For now matter-js is not installed as a dependency.
 import Matter from 'matter-js';
 
 import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';

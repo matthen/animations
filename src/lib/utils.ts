@@ -62,6 +62,62 @@ namespace Utils {
         );
     };
 
+    export interface Transition {
+        easing: 'smoothstep' | 'linear' | 'step';
+        startT: number;
+        endT: number;
+        startValue?: number; // May be inferred from context.
+        endValue: number;
+    }
+
+    const computeEasing = (easing: Transition['easing'], t: number, startT: number, endT: number): number => {
+        if (easing == 'smoothstep') {
+            return smoothstep(t, startT, endT);
+        } else if (easing == 'linear') {
+            return (t - startT) / (endT - startT);
+        } else if (easing == 'step') {
+            return t > (startT + endT) / 2 ? 1 : 0;
+        }
+        return 0.0; // unreachable
+    };
+
+    export const makeTransitionFunction = (transitions: Transition[]): ((t: number) => number) => {
+        if (transitions.length == 0) {
+            return (_t) => 0;
+        }
+        transitions.sort((tr1, tr2) => tr1.startT - tr2.startT);
+
+        // Populate the undefined start values.
+        const initialValue = transitions[0].startValue || 0.0;
+        const finalValue = transitions[transitions.length - 1].endValue;
+        let value = initialValue;
+        transitions.forEach((tr) => {
+            tr.startValue ??= value;
+            value = tr.endValue;
+        });
+
+        return (t: number) => {
+            let i = 0;
+            while (i < transitions.length && transitions[i].endT < t) {
+                // Could be a binary search but whatever.
+                i += 1;
+            }
+            if (i == transitions.length) {
+                return finalValue;
+            }
+            const tr = transitions[i];
+            if (tr.startT < t && t < tr.endT) {
+                // compute transition
+                const easing = computeEasing(tr.easing, t, tr.startT, tr.endT);
+                return tr.startValue! * (1 - easing) + tr.endValue * easing;
+            } else if (i == 0) {
+                return initialValue;
+            } else {
+                return transitions[i - 1].endValue;
+            }
+        };
+    };
+
     export const frac = (t: number): number => {
         // Fractional part of t.
         return t - Math.floor(t);

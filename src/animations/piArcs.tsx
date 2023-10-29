@@ -148,6 +148,7 @@ const PiArcs = () => {
                                 edge: false,
                                 startAngle: even ? -0.5 * Math.PI : -0.5 * Math.PI - angle * arc,
                                 endAngle: even ? -0.5 * Math.PI + angle * arc : -0.5 * Math.PI,
+                                sector: true,
                             }),
                         ],
                         [
@@ -184,6 +185,7 @@ const PiArcs = () => {
                                     edge: true,
                                     startAngle: th,
                                     endAngle: th + pyByFive,
+                                    sector: true,
                                 }),
                                 [
                                     [

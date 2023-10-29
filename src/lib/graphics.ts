@@ -49,7 +49,7 @@ namespace Graphics {
         edge,
         startAngle = 0,
         endAngle = 2 * Math.PI,
-        sector = true,
+        sector = false,
     }: {
         center: number[];
         radius: number;

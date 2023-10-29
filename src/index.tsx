@@ -1,4 +1,3 @@
-import Ballspin from 'animations/ballspin';
 import PiArcs from 'animations/piArcs';
 import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -14,10 +13,7 @@ const animations = [
         name: 'hypocycloids',
         component: Hypocycloids,
     },
-    {
-        name: 'ballspin',
-        component: Ballspin,
-    },
+
     {
         name: 'piArcs',
         component: PiArcs,
