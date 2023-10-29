@@ -12,19 +12,20 @@
     "@types/react": "^18.2.30",
     "@types/react-dom": "^18.2.14",
     "chroma-js": "^2.4.2",
+    "glsl-pipeline": "^1.0.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.11.0",
     "react-router-dom": "^6.17.0",
     "react-scripts": "5.0.1",
+    "three": "^0.158.0",
     "typescript": "^4.9.5",
     "use-debounce": "^9.0.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "eject": "react-scripts eject"
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build"
   },
   "eslintConfig": {
     "extends": [
@@ -48,9 +49,12 @@
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/chroma-js": "^2.4.2",
     "@types/matter-js": "^0.19.2",
+    "@types/three": "^0.158.0",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
     "prettier-plugin-tailwindcss": "^0.5.6",
+    "raw-loader": "^4.0.2",
+    "react-app-rewired": "^2.2.1",
     "tailwind-dracula": "^1.1.0",
     "tailwindcss": "^3.3.3"
   }

@@ -299,8 +299,8 @@ export const Animation = (props: AnimationOptions) => {
                                     <input
                                         type="number"
                                         min="0"
-                                        max={drawArgsUI[param.name]}
-                                        value={Math.round(drawArgsUI[param.name] * 100) / 100}
+                                        max={param.maxValue}
+                                        value={drawArgsUI[param.name]}
                                         step={param.step || 0.01}
                                         disabled={param.compute && controlMode != 'user'}
                                         className="ml-2 w-20 appearance-none rounded bg-dark px-2 py-1"

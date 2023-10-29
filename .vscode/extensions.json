@@ -5,7 +5,8 @@
 	"recommendations": [
 		"esbenp.prettier-vscode",
 		"bradlc.vscode-tailwindcss",
-		"MarkosTh09.color-picker"
+		"MarkosTh09.color-picker",
+		"raczzalan.webgl-glsl-editor"
 	],
 	// List of extensions recommended by VS Code that should not be recommended for users of this workspace.
 	"unwantedRecommendations": []

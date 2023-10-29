@@ -4,5 +4,6 @@
         "javascript",
         "typescript",
         "typescriptreact",
-    ]
+    ],
+    "webgl-glsl-editor.format.placeSpaceAfterKeywords": true
 }

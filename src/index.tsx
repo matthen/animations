@@ -1,5 +1,6 @@
 import Minimal from 'animations/minimal';
 import PiArcs from 'animations/piArcs';
+import Shader from 'animations/shader';
 import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { FaArrowLeft } from 'react-icons/fa';
@@ -22,6 +23,11 @@ const animations = [
     {
         name: 'piArcs',
         component: PiArcs,
+    },
+
+    {
+        name: 'shader',
+        component: Shader,
     },
 ];
 
