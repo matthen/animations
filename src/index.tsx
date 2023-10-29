@@ -1,3 +1,4 @@
+import Minimal from 'animations/minimal';
 import PiArcs from 'animations/piArcs';
 import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -9,6 +10,10 @@ import './index.css';
 import './index.css';
 
 const animations = [
+    {
+        name: 'minimal',
+        component: Minimal,
+    },
     {
         name: 'hypocycloids',
         component: Hypocycloids,

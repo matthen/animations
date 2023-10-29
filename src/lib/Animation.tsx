@@ -219,8 +219,8 @@ export const Animation = (props: AnimationOptions) => {
                             </button>
                         )}
                     </div>
-                    <div className="grid grid-cols-8 gap-2">
-                        <div className="col-span-1 pr-2 text-right">
+                    <div className="mt-4 grid grid-cols-9 gap-2">
+                        <div className="col-span-2 -mt-2 flex flex-row justify-end pr-2">
                             <button
                                 className="mr-2 text-light-200 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
                                 onClick={() => onClickReset()}
@@ -278,7 +278,7 @@ export const Animation = (props: AnimationOptions) => {
                         </div>
                         {props.parameters.map((param) => (
                             <React.Fragment key={param.name}>
-                                <div className="col-span-1 mt-1 pr-2 text-right text-sm">
+                                <div className="col-span-2 mt-1 pr-2 text-right text-sm">
                                     <p>{param.name}</p>
                                 </div>
                                 <div className="col-span-5">
