@@ -2,7 +2,7 @@ import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animatio
 import Graphics from 'lib/graphics';
 import Utils from 'lib/utils';
 
-const Minimal = () => {
+const Minimal2D = () => {
     const duration = 6;
     const canvasWidth = 768;
     const canvasHeight = 768;
@@ -70,4 +70,4 @@ const Minimal = () => {
     );
 };
 
-export default Minimal;
+export default Minimal2D;

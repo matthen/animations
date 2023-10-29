@@ -4,9 +4,9 @@ import { WebGLRenderer } from 'three';
 
 import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';
 
-import shader from './shaders/shader.glsl';
+import shader from './shaders/minimalShader.glsl';
 
-const Shader = () => {
+const MinimalShader = () => {
     const duration = 10;
     const canvasWidth = 768;
     const canvasHeight = 768;
@@ -45,4 +45,4 @@ const Shader = () => {
     );
 };
 
-export default Shader;
+export default MinimalShader;

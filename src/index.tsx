@@ -1,6 +1,6 @@
-import Minimal from 'animations/minimal';
+import Minimal2D from 'animations/minimal2D';
+import MinimalShader from 'animations/minimalShader';
 import PiArcs from 'animations/piArcs';
-import Shader from 'animations/shader';
 import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { FaArrowLeft } from 'react-icons/fa';
@@ -12,10 +12,6 @@ import './index.css';
 
 const animations = [
     {
-        name: 'minimal',
-        component: Minimal,
-    },
-    {
         name: 'hypocycloids',
         component: Hypocycloids,
     },
@@ -24,10 +20,13 @@ const animations = [
         name: 'piArcs',
         component: PiArcs,
     },
-
     {
-        name: 'shader',
-        component: Shader,
+        name: 'minimal2d',
+        component: Minimal2D,
+    },
+    {
+        name: 'minimalShader',
+        component: MinimalShader,
     },
 ];
 
