@@ -220,16 +220,16 @@ export const Animation = (props: AnimationOptions) => {
                         )}
                     </div>
                     <div className="mt-4 grid grid-cols-9 gap-2">
-                        <div className="col-span-2 -mt-2 flex flex-row justify-end pr-2">
+                        <div className="relative -top-1 col-span-2 flex flex-row justify-end pr-2 text-sm ">
                             <button
-                                className="mr-2 text-light-200 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
+                                className="rounded-l-md bg-dark px-2 text-light-200 hover:bg-dark-600 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
                                 onClick={() => onClickReset()}
                                 disabled={controlMode == 'recording'}
                             >
                                 <FaStepBackward />
                             </button>
                             <button
-                                className="text-light-200 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
+                                className="rounded-r-md bg-dark  px-2 text-light-200 hover:bg-dark-600 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
                                 onClick={() => onClickPlayPause()}
                                 disabled={controlMode == 'recording'}
                             >
