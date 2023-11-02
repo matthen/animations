@@ -35,9 +35,9 @@ const Minimal2D = () => {
         const ctx = canvas.getContext('2d')!;
 
         const drawFn: DrawFn = ({ r }: DrawArgs) => {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#020115';
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             Graphics.draw(
                 [
@@ -62,8 +62,8 @@ const Minimal2D = () => {
     return (
         <Animation
             duration={duration}
-            canvasWidth={canvasWidth}
-            canvasHeight={canvasHeight}
+            initialCanvasWidth={canvasWidth}
+            initialCanvasHeight={canvasHeight}
             makeDrawFn={makeDrawFn}
             parameters={parameters}
         />

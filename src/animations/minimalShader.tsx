@@ -20,6 +20,7 @@ const MinimalShader = () => {
         });
         let pipeline = new GlslPipeline(renderer, { u_t: { value: 0 }, u_speed: { value: 0 } });
         pipeline.load(shader);
+        pipeline.renderMain();
 
         const drawFn: DrawFn = ({ t, speed }: DrawArgs) => {
             if (t == 0) {
@@ -36,8 +37,8 @@ const MinimalShader = () => {
     return (
         <Animation
             duration={duration}
-            canvasWidth={canvasWidth}
-            canvasHeight={canvasHeight}
+            initialCanvasWidth={canvasWidth}
+            initialCanvasHeight={canvasHeight}
             makeDrawFn={makeDrawFn}
             parameters={parameters}
         />

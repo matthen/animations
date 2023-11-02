@@ -1,7 +1,8 @@
 import React from 'react';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { IconContext } from 'react-icons';
-import { FaPause, FaPlay, FaStepBackward } from 'react-icons/fa';
+import { FaLock, FaLockOpen, FaPause, FaPlay, FaStepBackward } from 'react-icons/fa';
+import { useDebouncedCallback } from 'use-debounce';
 
 export type DrawArgs = Record<string, number> & { t: number };
 export type DrawFn = (args: DrawArgs) => void;
@@ -17,8 +18,8 @@ export interface Parameter {
 
 interface AnimationOptions {
     duration: number;
-    canvasWidth: number;
-    canvasHeight: number;
+    initialCanvasWidth: number;
+    initialCanvasHeight: number;
     pixelRatio?: number;
     makeDrawFn: MakeDrawFn;
     parameters: Parameter[];
@@ -27,6 +28,11 @@ interface AnimationOptions {
 
 export const Animation = (props: AnimationOptions) => {
     const enableTimeControl = props.enableTimeControl === undefined ? true : props.enableTimeControl;
+    const [canvasDims, setCanvasDims] = useState({
+        width: props.initialCanvasWidth,
+        height: props.initialCanvasHeight,
+        arLocked: true,
+    });
     const [drawFn, setDrawFn] = useState<DrawFn | null>(null);
     const [controlMode, setControlMode] = useState('user' as 'playing' | 'user' | 'recording');
     const computeParamValues = (t: number): Record<string, number> =>
@@ -166,6 +172,59 @@ export const Animation = (props: AnimationOptions) => {
         drawArgs.current.t = props.duration;
     }, []);
 
+    const resizeCanvas = useDebouncedCallback(() => {
+        if (canvasElement.current === undefined) {
+            return;
+        }
+        canvasElement.current.width = canvasDims.width;
+        canvasElement.current.height = canvasDims.height;
+        lastDrawArgs.current = null;
+        setDrawFn(() => props.makeDrawFn(canvasElement.current!));
+    }, 500);
+
+    const updateCanvasHeight = useCallback(
+        (value: string) => {
+            const newHeight = Number(value);
+            let newWidth = canvasDims.width;
+            if (canvasDims.arLocked) {
+                const ar = canvasDims.width / canvasDims.height;
+                newWidth = Math.round(newHeight * ar);
+            }
+            setCanvasDims((old) => ({
+                ...old,
+                width: newWidth,
+                height: newHeight,
+            }));
+            resizeCanvas();
+        },
+        [canvasDims],
+    );
+
+    const updateCanvasWidth = useCallback(
+        (value: string) => {
+            const newWidth = Number(value);
+            let newHeight = canvasDims.height;
+            if (canvasDims.arLocked) {
+                const arInv = canvasDims.height / canvasDims.width;
+                newHeight = Math.round(newWidth * arInv);
+            }
+            setCanvasDims((old) => ({
+                ...old,
+                width: newWidth,
+                height: newHeight,
+            }));
+            resizeCanvas();
+        },
+        [canvasDims],
+    );
+
+    const toggleArLocked = useCallback(() => {
+        setCanvasDims((old) => ({
+            ...old,
+            arLocked: !canvasDims.arLocked,
+        }));
+    }, [canvasDims]);
+
     const pixelRatio = props.pixelRatio || window.devicePixelRatio;
 
     const setParam = (e: ChangeEvent<HTMLInputElement>, param: Parameter) => {
@@ -186,14 +245,16 @@ export const Animation = (props: AnimationOptions) => {
         <IconContext.Provider value={{ style: { verticalAlign: 'middle', display: 'inline' } }}>
             <div className="flex flex-row flex-wrap gap-4 ">
                 {/* canvas */}
-                <div className="">
-                    <div className="bg-black">
+                <div>
+                    <div className="w-48"></div>
+                    <div>
                         <canvas
-                            width={props.canvasWidth}
-                            height={props.canvasHeight}
+                            width={props.initialCanvasWidth}
+                            height={props.initialCanvasHeight}
                             style={{
-                                width: props.canvasWidth / pixelRatio,
-                                height: props.canvasHeight / pixelRatio,
+                                width: canvasDims.width / pixelRatio,
+                                height: canvasDims.height / pixelRatio,
+                                backgroundColor: '#000000',
                             }}
                             ref={setupCanvas}
                         />
@@ -201,16 +262,44 @@ export const Animation = (props: AnimationOptions) => {
                 </div>
                 {/* controls */}
                 <div className="flex h-full w-full flex-col gap-2 py-4" style={{ maxWidth: '512px' }}>
-                    <p className={controlMode == 'playing' ? 'text-light' : 'text-neutral-400'}>{fps.toFixed(2)} fps</p>
-                    <div className="flex flex-row gap-2">
-                        <button
-                            className="rounded bg-dark px-2 py-1 text-light hover:bg-dark-600 disabled:text-neutral-400 disabled:hover:bg-dark"
-                            onClick={() => onClickRecord()}
-                            disabled={controlMode == 'recording'}
-                        >
-                            export
-                        </button>
-                        {controlMode == 'recording' && (
+                    <div className="flex flex-row items-baseline gap-4">
+                        <div className="flex flex-row gap-1">
+                            <input
+                                type="number"
+                                step="1"
+                                className="w-20 appearance-none rounded bg-dark px-2 py-1"
+                                value={canvasDims.width}
+                                onChange={(e) => updateCanvasWidth(e.target.value)}
+                            />
+                            <p className="pt-1">&times;</p>
+                            <input
+                                type="number"
+                                step="1"
+                                className="w-20 appearance-none rounded bg-dark px-2 py-1"
+                                value={canvasDims.height}
+                                onChange={(e) => updateCanvasHeight(e.target.value)}
+                            />
+                            <button
+                                className="px-2 text-sm text-neutral-400 hover:text-light"
+                                onClick={() => toggleArLocked()}
+                            >
+                                {canvasDims.arLocked ? (
+                                    <FaLock />
+                                ) : (
+                                    <FaLockOpen style={{ position: 'relative', left: '2px' }} />
+                                )}
+                            </button>
+                        </div>
+                        <div className="flex-grow"></div>
+
+                        {controlMode != 'recording' ? (
+                            <button
+                                className="rounded bg-dark px-2 py-1 text-light hover:bg-dark-600 disabled:text-neutral-400 disabled:hover:bg-dark"
+                                onClick={() => onClickRecord()}
+                            >
+                                export
+                            </button>
+                        ) : (
                             <button
                                 className="rounded bg-dark px-2 py-1 text-light hover:bg-dark-600 "
                                 onClick={() => onClickCancelRecord()}
@@ -218,6 +307,9 @@ export const Animation = (props: AnimationOptions) => {
                                 cancel
                             </button>
                         )}
+                        <p className={'w-20 ' + (controlMode == 'playing' ? 'text-light' : 'text-neutral-400')}>
+                            {fps.toFixed(1)} fps
+                        </p>
                     </div>
                     <div className="mt-4 grid grid-cols-9 gap-2">
                         <div className="relative -top-1 col-span-2 flex flex-row justify-end pr-2 text-sm ">

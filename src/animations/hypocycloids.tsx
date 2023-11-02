@@ -32,9 +32,9 @@ const Hypocycloids = () => {
 
         const drawFn: DrawFn = ({ theta, n }: DrawArgs) => {
             const r = 1 / n;
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#020115';
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             const inFirstHalf = theta < 2 * Math.PI;
             const traceInFn = (th: number) => [
                 Math.sin(th) * (1 - r) - Math.sin((th * (1 - r)) / r) * r,
@@ -105,8 +105,8 @@ const Hypocycloids = () => {
     return (
         <Animation
             duration={duration}
-            canvasWidth={canvasWidth}
-            canvasHeight={canvasHeight}
+            initialCanvasWidth={canvasWidth}
+            initialCanvasHeight={canvasHeight}
             makeDrawFn={makeDrawFn}
             parameters={parameters}
         />

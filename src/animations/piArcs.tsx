@@ -57,9 +57,9 @@ const PiArcs = () => {
         const ctx = canvas.getContext('2d')!;
 
         const drawFn: DrawFn = ({ t, arc, next, index, zoom, centreX, centreY }: DrawArgs) => {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = bgColor;
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const digit = Number(Utils.piDigits[index]);
             const even = index % 2 == 0;
@@ -240,8 +240,8 @@ const PiArcs = () => {
     return (
         <Animation
             duration={duration}
-            canvasWidth={canvasWidth}
-            canvasHeight={canvasHeight}
+            initialCanvasWidth={canvasWidth}
+            initialCanvasHeight={canvasHeight}
             makeDrawFn={makeDrawFn}
             parameters={parameters}
             enableTimeControl={true}

@@ -144,8 +144,8 @@ const Ballspin = () => {
     return (
         <Animation
             duration={duration}
-            canvasWidth={canvasWidth}
-            canvasHeight={canvasHeight}
+            initialCanvasWidth={canvasWidth}
+            initialCanvasHeight={canvasHeight}
             makeDrawFn={makeDrawFn}
             parameters={parameters}
             enableTimeControl={false}
