@@ -26,6 +26,12 @@ interface AnimationOptions {
     enableTimeControl?: boolean;
 }
 
+interface CanvasDims {
+    width: number;
+    height: number;
+    arLocked: boolean; // Whether the aspect ratio is locked.
+}
+
 export const Animation = (props: AnimationOptions) => {
     const enableTimeControl = props.enableTimeControl === undefined ? true : props.enableTimeControl;
     const [canvasDims, setCanvasDims] = useState({
@@ -176,59 +182,22 @@ export const Animation = (props: AnimationOptions) => {
         if (canvasElement.current === undefined) {
             return;
         }
+        if (canvasElement.current.width == canvasDims.width && canvasElement.current.height == canvasDims.height) {
+            return;
+        }
         canvasElement.current.width = canvasDims.width;
         canvasElement.current.height = canvasDims.height;
         lastDrawArgs.current = null;
         setDrawFn(() => props.makeDrawFn(canvasElement.current!));
     }, 500);
 
-    const updateCanvasHeight = useCallback(
-        (value: string) => {
-            const newHeight = Number(value);
-            let newWidth = canvasDims.width;
-            if (canvasDims.arLocked) {
-                const ar = canvasDims.width / canvasDims.height;
-                newWidth = Math.round(newHeight * ar);
-            }
-            setCanvasDims((old) => ({
-                ...old,
-                width: newWidth,
-                height: newHeight,
-            }));
-            resizeCanvas();
-        },
-        [canvasDims],
-    );
-
-    const updateCanvasWidth = useCallback(
-        (value: string) => {
-            const newWidth = Number(value);
-            let newHeight = canvasDims.height;
-            if (canvasDims.arLocked) {
-                const arInv = canvasDims.height / canvasDims.width;
-                newHeight = Math.round(newWidth * arInv);
-            }
-            setCanvasDims((old) => ({
-                ...old,
-                width: newWidth,
-                height: newHeight,
-            }));
-            resizeCanvas();
-        },
-        [canvasDims],
-    );
-
-    const toggleArLocked = useCallback(() => {
-        setCanvasDims((old) => ({
-            ...old,
-            arLocked: !canvasDims.arLocked,
-        }));
+    useEffect(() => {
+        resizeCanvas();
     }, [canvasDims]);
 
     const pixelRatio = props.pixelRatio || window.devicePixelRatio;
 
-    const setParam = (e: ChangeEvent<HTMLInputElement>, param: Parameter) => {
-        const value = Number(e.target.value);
+    const setParam = (value: number, param: Parameter): void => {
         if (param.compute || controlMode == 'user') {
             setDrawArgsUI((old) => {
                 return {
@@ -239,6 +208,15 @@ export const Animation = (props: AnimationOptions) => {
         } else {
             drawArgs.current[param.name] = value;
         }
+    };
+
+    const timeParameter: Parameter = {
+        name: 't',
+        compute: (t) => t,
+        defaultValue: 0.0,
+        minValue: 0.0,
+        maxValue: props.duration,
+        step: 0.01,
     };
 
     return (
@@ -264,34 +242,9 @@ export const Animation = (props: AnimationOptions) => {
                 <div className="flex h-full w-full flex-col gap-2 py-4" style={{ maxWidth: '512px' }}>
                     <div className="flex flex-row items-baseline gap-4">
                         <div className="flex flex-row gap-1">
-                            <input
-                                type="number"
-                                step="1"
-                                className="w-20 appearance-none rounded bg-dark px-2 py-1"
-                                value={canvasDims.width}
-                                onChange={(e) => updateCanvasWidth(e.target.value)}
-                            />
-                            <p className="pt-1">&times;</p>
-                            <input
-                                type="number"
-                                step="1"
-                                className="w-20 appearance-none rounded bg-dark px-2 py-1"
-                                value={canvasDims.height}
-                                onChange={(e) => updateCanvasHeight(e.target.value)}
-                            />
-                            <button
-                                className="px-2 text-sm text-neutral-400 hover:text-light"
-                                onClick={() => toggleArLocked()}
-                            >
-                                {canvasDims.arLocked ? (
-                                    <FaLock />
-                                ) : (
-                                    <FaLockOpen style={{ position: 'relative', left: '2px' }} />
-                                )}
-                            </button>
+                            <CanvasDimControls canvasDims={canvasDims} setCanvasDims={setCanvasDims} />
                         </div>
                         <div className="flex-grow"></div>
-
                         {controlMode != 'recording' ? (
                             <button
                                 className="rounded bg-dark px-2 py-1 text-light hover:bg-dark-600 disabled:text-neutral-400 disabled:hover:bg-dark"
@@ -312,101 +265,170 @@ export const Animation = (props: AnimationOptions) => {
                         </p>
                     </div>
                     <div className="mt-4 grid grid-cols-9 gap-2">
-                        <div className="relative -top-1 col-span-2 flex flex-row justify-end pr-2 text-sm ">
-                            <button
-                                className="rounded-l-md bg-dark px-2 text-light-200 hover:bg-dark-600 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
-                                onClick={() => onClickReset()}
-                                disabled={controlMode == 'recording'}
-                            >
-                                <FaStepBackward />
-                            </button>
-                            <button
-                                className="rounded-r-md bg-dark  px-2 text-light-200 hover:bg-dark-600 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
-                                onClick={() => onClickPlayPause()}
-                                disabled={controlMode == 'recording'}
-                            >
-                                {controlMode == 'playing' ? <FaPause /> : <FaPlay />}
-                            </button>
-                        </div>
-                        <div className="col-span-5">
-                            <input
-                                type="range"
-                                min="0"
-                                max={props.duration}
-                                value={drawArgsUI.t}
-                                step={0.01}
-                                disabled={controlMode != 'user' || !enableTimeControl}
-                                className="h-2 w-full appearance-none rounded-lg bg-dark accent-pink"
-                                onChange={(e) =>
-                                    setDrawArgsUI((old) => {
-                                        return {
-                                            ...old,
-                                            t: Number(e.target.value),
-                                            ...computeParamValues(Number(e.target.value)),
-                                        };
-                                    })
-                                }
-                            />
-                        </div>
-                        <div className="col-span-2">
-                            <input
-                                type="number"
-                                min="0"
-                                max={props.duration}
-                                value={Math.round(drawArgsUI.t * 100) / 100}
-                                step={0.01}
-                                disabled={controlMode != 'user' || !enableTimeControl}
-                                className="ml-2 w-20 appearance-none rounded bg-dark px-2 py-1"
-                                onChange={(e) =>
-                                    setDrawArgsUI((old) => {
-                                        return {
-                                            ...old,
-                                            t: Number(e.target.value),
-                                            ...computeParamValues(Number(e.target.value)),
-                                        };
-                                    })
-                                }
-                            />
-                        </div>
+                        <ParamController
+                            param={timeParameter}
+                            value={drawArgsUI.t}
+                            onChange={(value) =>
+                                setDrawArgsUI((old) => {
+                                    return {
+                                        ...old,
+                                        t: value,
+                                        ...computeParamValues(value),
+                                    };
+                                })
+                            }
+                            disabled={controlMode != 'user' || !enableTimeControl}
+                        >
+                            <div className="relative -top-1 col-span-2 flex flex-row justify-end pr-2 text-sm ">
+                                <button
+                                    className="rounded-l-md bg-dark px-2 text-light-200 hover:bg-dark-600 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
+                                    onClick={() => onClickReset()}
+                                    disabled={controlMode == 'recording'}
+                                >
+                                    <FaStepBackward />
+                                </button>
+                                <button
+                                    className="rounded-r-md bg-dark  px-2 text-light-200 hover:bg-dark-600 hover:text-light disabled:text-neutral-400 disabled:hover:text-neutral-400"
+                                    onClick={() => onClickPlayPause()}
+                                    disabled={controlMode == 'recording'}
+                                >
+                                    {controlMode == 'playing' ? <FaPause /> : <FaPlay />}
+                                </button>
+                            </div>
+                        </ParamController>
                         {props.parameters.map((param) => (
-                            <React.Fragment key={param.name}>
+                            <ParamController
+                                param={param}
+                                value={drawArgsUI[param.name]}
+                                disabled={param.compute !== undefined && controlMode != 'user'}
+                                onChange={(value) => setParam(value, param)}
+                                key={param.name}
+                            >
                                 <div className="col-span-2 mt-1 pr-2 text-right text-sm">
                                     <p>{param.name}</p>
                                 </div>
-                                <div className="col-span-5">
-                                    <input
-                                        type="range"
-                                        min={param.minValue}
-                                        max={param.maxValue}
-                                        value={drawArgsUI[param.name]}
-                                        step={param.step || 0.01}
-                                        disabled={param.compute && controlMode != 'user'}
-                                        className="h-2 w-full appearance-none rounded-lg bg-dark accent-pink"
-                                        onChange={(e) => {
-                                            setParam(e, param);
-                                        }}
-                                    />
-                                </div>
-                                <div className="col-span-2">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max={param.maxValue}
-                                        value={drawArgsUI[param.name]}
-                                        step={param.step || 0.01}
-                                        disabled={param.compute && controlMode != 'user'}
-                                        className="ml-2 w-20 appearance-none rounded bg-dark px-2 py-1"
-                                        onChange={(e) => {
-                                            setParam(e, param);
-                                        }}
-                                    />
-                                </div>
-                            </React.Fragment>
+                            </ParamController>
                         ))}
                     </div>
                 </div>
             </div>
         </IconContext.Provider>
+    );
+};
+
+const CanvasDimControls = ({
+    canvasDims,
+    setCanvasDims,
+}: {
+    canvasDims: CanvasDims;
+    setCanvasDims: React.Dispatch<React.SetStateAction<CanvasDims>>;
+}) => {
+    const updateCanvasHeight = useCallback(
+        (value: string) => {
+            const newHeight = Number(value);
+            let newWidth = canvasDims.width;
+            if (canvasDims.arLocked) {
+                const ar = canvasDims.width / canvasDims.height;
+                newWidth = Math.round(newHeight * ar);
+            }
+            setCanvasDims((old) => ({
+                ...old,
+                width: newWidth,
+                height: newHeight,
+            }));
+        },
+        [canvasDims],
+    );
+
+    const updateCanvasWidth = useCallback(
+        (value: string) => {
+            const newWidth = Number(value);
+            let newHeight = canvasDims.height;
+            if (canvasDims.arLocked) {
+                const arInv = canvasDims.height / canvasDims.width;
+                newHeight = Math.round(newWidth * arInv);
+            }
+            setCanvasDims((old) => ({
+                ...old,
+                width: newWidth,
+                height: newHeight,
+            }));
+        },
+        [canvasDims],
+    );
+
+    const toggleArLocked = useCallback(() => {
+        setCanvasDims((old) => ({
+            ...old,
+            arLocked: !canvasDims.arLocked,
+        }));
+    }, [canvasDims]);
+
+    return (
+        <React.Fragment>
+            <input
+                type="number"
+                step="1"
+                className="w-20 appearance-none rounded bg-dark px-2 py-1"
+                value={canvasDims.width}
+                onChange={(e) => updateCanvasWidth(e.target.value)}
+            />
+            <p className="pt-1">&times;</p>
+            <input
+                type="number"
+                step="1"
+                className="w-20 appearance-none rounded bg-dark px-2 py-1"
+                value={canvasDims.height}
+                onChange={(e) => updateCanvasHeight(e.target.value)}
+            />
+            <button className="px-2 text-sm text-neutral-400 hover:text-light" onClick={() => toggleArLocked()}>
+                {canvasDims.arLocked ? <FaLock /> : <FaLockOpen style={{ position: 'relative', left: '2px' }} />}
+            </button>
+        </React.Fragment>
+    );
+};
+
+const ParamController = ({
+    children,
+    param,
+    value,
+    disabled,
+    onChange,
+}: {
+    children: React.ReactNode;
+    param: Parameter;
+    value: number;
+    disabled: boolean;
+    onChange: (value: number) => void;
+}) => {
+    return (
+        <React.Fragment key={param.name}>
+            {children}
+            <div className="col-span-5">
+                <input
+                    type="range"
+                    min={param.minValue}
+                    max={param.maxValue}
+                    value={value}
+                    step={param.step || 0.01}
+                    disabled={disabled}
+                    className="h-2 w-full appearance-none rounded-lg bg-dark accent-pink"
+                    onChange={(e) => onChange(Number(e.target.value))}
+                />
+            </div>
+            <div className="col-span-2">
+                <input
+                    type="number"
+                    min="0"
+                    max={param.maxValue}
+                    value={value}
+                    step={param.step || 0.01}
+                    disabled={disabled}
+                    className="ml-2 w-20 appearance-none rounded bg-dark px-2 py-1"
+                    onChange={(e) => onChange(Number(e.target.value))}
+                />
+            </div>
+        </React.Fragment>
     );
 };
 
