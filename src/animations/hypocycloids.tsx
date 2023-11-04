@@ -3,7 +3,7 @@ import Graphics from 'lib/graphics';
 import Utils from 'lib/utils';
 
 const Hypocycloids = () => {
-    const duration = 10;
+    const duration = 12;
     const canvasWidth = 1024;
     const canvasHeight = 1024;
 
@@ -66,7 +66,6 @@ const Hypocycloids = () => {
                             ),
                         }),
                     ],
-
                     [
                         Graphics.Rotate({ angle: theta, center: [0, 0] }),
                         // Rolling circles.
@@ -76,16 +75,28 @@ const Hypocycloids = () => {
                             Graphics.Disk({ center: [0, 1 - r], radius: r, fill: true, edge: true }),
                             Graphics.Rotate({ angle: -theta / r, center: [0, 1 - r] }),
                             // Point on rolling circle.
-                            Graphics.Set({ fillStyle: '#ffd876', strokeStyle: 'black' }),
-                            Graphics.Disk({ center: [0, 1], radius: 0.03, fill: true, edge: true }),
+                            Graphics.Set({ fillStyle: '#f39034', strokeStyle: 'black' }),
+                            Graphics.Disk({
+                                center: [0, 1],
+                                radius: 16,
+                                fill: true,
+                                edge: true,
+                                radiusInPixels: true,
+                            }),
                         ],
                         [
                             // outside
                             Graphics.Disk({ center: [0, 1 + r], radius: r, fill: true, edge: true }),
                             Graphics.Rotate({ angle: theta / r, center: [0, 1 + r] }),
                             // Point on rolling circle.
-                            Graphics.Set({ fillStyle: '#ffd876', strokeStyle: 'black' }),
-                            Graphics.Disk({ center: [0, 1], radius: 0.03, fill: true, edge: true }),
+                            Graphics.Set({ fillStyle: '#f39034', strokeStyle: 'black' }),
+                            Graphics.Disk({
+                                center: [0, 1],
+                                radius: 16,
+                                fill: true,
+                                edge: true,
+                                radiusInPixels: true,
+                            }),
                         ],
                     ],
                 ],

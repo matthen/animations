@@ -50,6 +50,7 @@ namespace Graphics {
         startAngle = 0,
         endAngle = 2 * Math.PI,
         sector = false,
+        radiusInPixels = false,
     }: {
         center: number[];
         radius: number;
@@ -58,8 +59,13 @@ namespace Graphics {
         startAngle?: number;
         endAngle?: number;
         sector?: boolean;
+        radiusInPixels?: boolean;
     }): DrawCommand => {
         return (ctx) => {
+            if (radiusInPixels) {
+                const transform = ctx.getTransform();
+                radius = radius / Math.sqrt(transform.a * transform.a + transform.b * transform.b);
+            }
             if (!fill && !edge) {
                 return;
             }
