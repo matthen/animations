@@ -31,6 +31,7 @@ const Hypocycloids = () => {
         const ctx = canvas.getContext('2d')!;
 
         const drawFn: DrawFn = ({ theta, n }: DrawArgs) => {
+            theta = Math.min(theta, 4 * Math.PI - 1e-5);
             const r = 1 / n;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#020115';
