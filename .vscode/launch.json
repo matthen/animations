@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "command": "pnpm run start",
+            "name": "launch",
+            "request": "launch",
+            "type": "node-terminal",
+            "cwd": "${workspaceRoot}"
+        }
+    ]
+}
