@@ -1,5 +1,6 @@
 import Minimal2D from 'animations/minimal2D';
 import MinimalShader from 'animations/minimalShader';
+import NoiseDodecahedron from 'animations/noiseDodecahedron';
 import PiArcs from 'animations/piArcs';
 import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -15,10 +16,13 @@ const animations = [
         name: 'hypocycloids',
         component: Hypocycloids,
     },
-
     {
         name: 'piArcs',
         component: PiArcs,
+    },
+    {
+        name: 'noiseDodecahedron',
+        component: NoiseDodecahedron,
     },
     {
         name: 'minimal2d',
