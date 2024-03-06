@@ -10,6 +10,7 @@ import { Link, RouterProvider, createHashRouter } from 'react-router-dom';
 import Hypocycloids from './animations/hypocycloids';
 import './index.css';
 import './index.css';
+import Anaglyph from 'animations/anaglyph';
 
 const animations = [
     {
@@ -23,6 +24,10 @@ const animations = [
     {
         name: 'noiseDodecahedron',
         component: NoiseDodecahedron,
+    },
+    {
+        name: 'anaglyph',
+        component: Anaglyph,
     },
     {
         name: 'minimal2d',
