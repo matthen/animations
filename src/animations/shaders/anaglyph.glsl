@@ -42,29 +42,34 @@ void main() {
     // butterfly text texture is 42 by 7
     int y = int(floor(uv.y * res)) % 7;
     float rowIndex = floor(uv.y * res / 7.0);
-    int x = int(floor(uv.x * res) + 10. * sin(rowIndex * 0.5) + 100.0) % 42;
+    int x = int(floor(uv.x * res) + 20. * sin(rowIndex * 2.) + 100.0) % 42;
 
     float butterflyText = texelFetch(u_tex0, ivec2(x, y), 0).r;
-    // uvI = uv;
 
     vec2 uvI = floor(uv * res) / res;
 
-    // Start as noise
-    vec3 color = hash32(uvI * u_resolution.xy);
-
     float message = 0.;
 
+    // Add the text
     message = mix(message, 0.9, smoothstep(0., pixel.x, 1. - butterflyText));
+
+    // Add outside of butterfly
     message = mix(message, 0.7, smoothstep(0., pixel.x, dist(uvI)));
+
+    // Subtract inside of butterfly
     message = mix(0.1, message, smoothstep(0., pixel.x, 2. - dist(uvI)));
+
+    // Add noise
     message = mix(message, 0.8, smoothstep(0.0, 1.5, hash12(uvI * u_resolution.xy)));
 
     message = 1. - 0.6 * message;
 
+    // Start as noise
+    vec3 color = hash32(uvI * u_resolution.xy);
     // combine random color with the message.
     color.r = mix(clamp(color.r, 0.7, 1.0), 0.2 * color.r, message);
     color = mix(color, vec3(1.0, 0, 0) * color, u_redness);
-    color.g *= 0.5;
+    color.g *= 0.5;  // Reduce green.
 
     // color = vec3(message);
     gl_FragColor = vec4(color, 1.0);
