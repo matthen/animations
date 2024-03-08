@@ -11,6 +11,7 @@ import Hypocycloids from './animations/hypocycloids';
 import './index.css';
 import './index.css';
 import Anaglyph from 'animations/anaglyph';
+import Dither from 'animations/dither';
 
 const animations = [
     {
@@ -28,6 +29,10 @@ const animations = [
     {
         name: 'anaglyph',
         component: Anaglyph,
+    },
+    {
+        name: 'dither',
+        component: Dither,
     },
     {
         name: 'minimal2d',
