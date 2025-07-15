@@ -9,7 +9,7 @@ import shader from './shaders/noiseDodecahedron.glsl';
 
 const NoiseDodecahedron = () => {
     const duration = 20;
-    
+
     const canvasWidth = 768;
     const canvasHeight = 768;
 

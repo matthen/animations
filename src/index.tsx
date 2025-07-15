@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { FaArrowLeft } from 'react-icons/fa';
@@ -10,11 +9,14 @@ import './index.css';
 const animationsContext = require.context('./animations', false, /\.(t|j)sx?$/);
 
 // Construct the animations list from file names
-const animations = animationsContext.keys().filter((file) => !file.startsWith("animations/")).map((file) => {
-    const name = file.replace('./', '').replace(/\.tsx?$/, '');
-    const component = React.lazy(() => import(`./animations/${name}`));
-    return { name, component };
-});
+const animations = animationsContext
+    .keys()
+    .filter((file) => !file.startsWith('animations/'))
+    .map((file) => {
+        const name = file.replace('./', '').replace(/\.tsx?$/, '');
+        const component = React.lazy(() => import(`./animations/${name}`));
+        return { name, component };
+    });
 
 const AnimationList = () => {
     return (
