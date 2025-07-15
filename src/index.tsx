@@ -1,48 +1,20 @@
-import Minimal2D from 'animations/minimal2D';
-import MinimalShader from 'animations/minimalShader';
-import NoiseDodecahedron from 'animations/noiseDodecahedron';
-import PiArcs from 'animations/piArcs';
+
 import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { FaArrowLeft } from 'react-icons/fa';
 import { Link, RouterProvider, createHashRouter } from 'react-router-dom';
 
-import Hypocycloids from './animations/hypocycloids';
 import './index.css';
-import './index.css';
-import Anaglyph from 'animations/anaglyph';
-import Dither from 'animations/dither';
 
-const animations = [
-    {
-        name: 'hypocycloids',
-        component: Hypocycloids,
-    },
-    {
-        name: 'piArcs',
-        component: PiArcs,
-    },
-    {
-        name: 'noiseDodecahedron',
-        component: NoiseDodecahedron,
-    },
-    {
-        name: 'anaglyph',
-        component: Anaglyph,
-    },
-    {
-        name: 'dither',
-        component: Dither,
-    },
-    {
-        name: 'minimal2d',
-        component: Minimal2D,
-    },
-    {
-        name: 'minimalShader',
-        component: MinimalShader,
-    },
-];
+// Dynamically import all animation components from the 'animations' directory.
+const animationsContext = require.context('./animations', false, /\.(t|j)sx?$/);
+
+// Construct the animations list from file names
+const animations = animationsContext.keys().filter((file) => !file.startsWith("animations/")).map((file) => {
+    const name = file.replace('./', '').replace(/\.tsx?$/, '');
+    const component = animationsContext(file).default;
+    return { name, component };
+});
 
 const AnimationList = () => {
     return (
