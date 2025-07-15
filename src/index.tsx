@@ -12,7 +12,7 @@ const animationsContext = require.context('./animations', false, /\.(t|j)sx?$/);
 // Construct the animations list from file names
 const animations = animationsContext.keys().filter((file) => !file.startsWith("animations/")).map((file) => {
     const name = file.replace('./', '').replace(/\.tsx?$/, '');
-    const component = animationsContext(file).default;
+    const component = React.lazy(() => import(`./animations/${name}`));
     return { name, component };
 });
 
@@ -56,7 +56,9 @@ const router = createHashRouter([
             path: `/${animation.name}`,
             element: (
                 <ViewAnimation>
-                    <animation.component />
+                    <React.Suspense fallback={<div>Loading...</div>}>
+                        <animation.component />
+                    </React.Suspense>
                 </ViewAnimation>
             ),
         };
