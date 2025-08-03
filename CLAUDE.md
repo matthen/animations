@@ -54,14 +54,23 @@ Parameters can be:
 
 ## Creating New Animations
 
-Use the interactive script: `pnpm new-animation`
+The animation generator supports both interactive and command-line modes. Claude should prefer using the command line mode.
 
-The script will prompt for:
-1. Animation name
-2. Type (shader or 2D canvas)
-3. Parameter names (all default to 0-1 range)
+```bash
+# Shader animation with parameters
+pnpm new-animation --name "My Animation" --type shader --params param1,param2,param3
 
-It generates:
+# 2D canvas animation with parameters
+pnpm new-animation --name "Circle Dance" --type 2d --params radius,speed
+
+# Minimal shader animation (no parameters)
+pnpm new-animation --name "Simple Shader" --type shader
+
+# Type aliases: shader|1, 2d|canvas|2
+pnpm new-animation --name "Test" --type 1 --params x,y
+```
+
+This will generate:
 - TypeScript animation component in `src/animations/`
 - GLSL shader file (for shader animations) in `src/animations/shaders/`
 - Properly configured uniforms and parameter bindings

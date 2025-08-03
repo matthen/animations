@@ -49,10 +49,13 @@
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/chroma-js": "^2.4.2",
+    "@types/inquirer": "^9.0.8",
     "@types/matter-js": "^0.19.2",
     "@types/three": "^0.158.0",
     "@types/webpack-env": "^1.18.8",
     "autoprefixer": "^10.4.16",
+    "commander": "^14.0.0",
+    "inquirer": "^12.9.0",
     "postcss": "^8.4.31",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.5.7",

@@ -8,7 +8,8 @@
  * - 2D Canvas animations (using Graphics library)
  *
  * Usage:
- *   pnpm new-animation
+ *   pnpm new-animation                           # Interactive mode
+ *   pnpm new-animation --name "My Animation" --type shader --params param1,param2
  *
  * The script will prompt for animation name, type, and parameters,
  * then generate all necessary files with proper templates.
@@ -16,18 +17,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-});
-
-function question(prompt) {
-    return new Promise((resolve) => {
-        rl.question(prompt, resolve);
-    });
-}
+const { Command } = require('commander');
+const inquirer = require('inquirer').default;
 
 function toPascalCase(str) {
     return str.replace(/(?:^|\s)(\w)/g, (_, char) => char.toUpperCase()).replace(/\s/g, '');
@@ -99,49 +90,17 @@ function create2DAnimationTemplate(name, parameters) {
     return template;
 }
 
-async function main() {
-    console.log('🎨 Animation Generator');
-    console.log('===================\n');
+async function createAnimation({ name, type, params }) {
+    // Sanitize inputs
+    const finalName = name.replace(/[-_]/g, ' ');
+    const isShader = type === 'shader';
+    const parameters = params || [];
 
-    // Get animation name
-    const randomHash = Math.random().toString(36).substring(2, 6);
-    const defaultName = `new animation ${randomHash}`;
-    const name = await question(`Animation name (${defaultName}): `);
-    // Convert dashes and underscores to spaces to ensure valid TypeScript identifiers
-    const sanitizedName = (name.trim() || defaultName).replace(/[-_]/g, ' ');
-    const finalName = sanitizedName;
-
-    // Get animation type
-    console.log('\nSelect animation type:');
-    console.log('1. Shader animation (WebGL/GLSL)');
-    console.log('2. 2D Canvas animation');
-    const typeChoice = await question('Enter choice (1 or 2): ');
-
-    if (!['1', '2'].includes(typeChoice)) {
-        console.log('❌ Invalid choice');
-        rl.close();
-        return;
-    }
-
-    const isShader = typeChoice === '1';
-
-    // Get parameters
-    console.log('\nParameters (press Enter with empty name to finish):');
-    const parameters = [];
-    let paramIndex = 1;
-
-    while (true) {
-        const paramName = await question(`Parameter ${paramIndex} name: `);
-        if (!paramName.trim()) break;
-
-        // Validate parameter name
-        if (!/^[a-zA-Z][a-zA-Z0-9]*$/.test(paramName)) {
-            console.log('❌ Parameter name must be alphanumeric and start with a letter');
-            continue;
+    // Validate parameter names
+    for (const param of parameters) {
+        if (!/^[a-zA-Z][a-zA-Z0-9]*$/.test(param)) {
+            throw new Error(`Parameter name "${param}" must be alphanumeric and start with a letter`);
         }
-
-        parameters.push(paramName.trim());
-        paramIndex++;
     }
 
     console.log(
@@ -156,59 +115,185 @@ async function main() {
     const animationDir = path.join(__dirname, '..', 'src', 'animations');
     const shaderDir = path.join(animationDir, 'shaders');
 
-    try {
-        // Create animation file
-        const animationFile = path.join(animationDir, `${camelName}.tsx`);
-        if (fs.existsSync(animationFile)) {
-            const overwrite = await question(`⚠️  File ${camelName}.tsx already exists. Overwrite? (y/N): `);
-            if (overwrite.toLowerCase() !== 'y') {
-                console.log('❌ Cancelled');
-                rl.close();
-                return;
-            }
-        }
-
-        const animationContent = isShader
-            ? createShaderAnimationTemplate(finalName, parameters)
-            : create2DAnimationTemplate(finalName, parameters);
-
-        fs.writeFileSync(animationFile, animationContent);
-        console.log(`✅ Created ${animationFile}`);
-
-        // Create shader file if needed
-        if (isShader) {
-            const shaderFile = path.join(shaderDir, `${camelName}.glsl`);
-            if (fs.existsSync(shaderFile)) {
-                const overwrite = await question(`⚠️  File ${camelName}.glsl already exists. Overwrite? (y/N): `);
-                if (overwrite.toLowerCase() === 'y') {
-                    const shaderContent = createShaderTemplate(finalName, parameters);
-                    fs.writeFileSync(shaderFile, shaderContent);
-                    console.log(`✅ Created ${shaderFile}`);
-                }
-            } else {
-                const shaderContent = createShaderTemplate(finalName, parameters);
-                fs.writeFileSync(shaderFile, shaderContent);
-                console.log(`✅ Created ${shaderFile}`);
-            }
-        }
-
-        console.log('\n🎉 Animation created successfully!');
-        console.log('\nNext steps:');
-        console.log(`1. Import and add ${pascalName} to your animation list`);
-        console.log(
-            `2. ${
-                isShader
-                    ? 'Edit the shader logic in the .glsl file'
-                    : 'Add your drawing commands to the Graphics.draw array'
-            }`,
-        );
-        console.log('3. Customize parameters and add transition functions if needed');
-        console.log('4. Run `pnpm start` to see your animation');
-    } catch (error) {
-        console.error('❌ Error creating files:', error.message);
+    // Create animation file
+    const animationFile = path.join(animationDir, `${camelName}.tsx`);
+    if (fs.existsSync(animationFile)) {
+        throw new Error(`File ${camelName}.tsx already exists`);
     }
 
-    rl.close();
+    const animationContent = isShader
+        ? createShaderAnimationTemplate(finalName, parameters)
+        : create2DAnimationTemplate(finalName, parameters);
+
+    fs.writeFileSync(animationFile, animationContent);
+    console.log(`✅ Created ${animationFile}`);
+
+    // Create shader file if needed
+    if (isShader) {
+        const shaderFile = path.join(shaderDir, `${camelName}.glsl`);
+        if (fs.existsSync(shaderFile)) {
+            throw new Error(`File ${camelName}.glsl already exists`);
+        }
+        
+        const shaderContent = createShaderTemplate(finalName, parameters);
+        fs.writeFileSync(shaderFile, shaderContent);
+        console.log(`✅ Created ${shaderFile}`);
+    }
+
+    console.log('\n🎉 Animation created successfully!');
+    console.log('\nNext steps:');
+    console.log(`1. Import and add ${pascalName} to your animation list`);
+    console.log(
+        `2. ${
+            isShader
+                ? 'Edit the shader logic in the .glsl file'
+                : 'Add your drawing commands to the Graphics.draw array'
+        }`,
+    );
+    console.log('3. Customize parameters and add transition functions if needed');
+    console.log('4. Run `pnpm start` to see your animation');
+}
+
+async function promptForMissing(options) {
+    const questions = [];
+    
+    // Prompt for name if not provided
+    if (!options.name) {
+        questions.push({
+            type: 'input',
+            name: 'name',
+            message: 'Animation name:',
+            default: () => {
+                const randomHash = Math.random().toString(36).substring(2, 6);
+                return `new animation ${randomHash}`;
+            },
+        });
+    }
+    
+    // Prompt for type if not provided
+    if (!options.type) {
+        questions.push({
+            type: 'list',
+            name: 'type',
+            message: 'Select animation type:',
+            choices: [
+                { name: 'Shader animation (WebGL/GLSL)', value: 'shader' },
+                { name: '2D Canvas animation', value: '2d' },
+            ],
+        });
+    }
+    
+    // Prompt for params if not provided
+    if (!options.params) {
+        questions.push({
+            type: 'input',
+            name: 'paramInput',
+            message: 'Parameters (comma-separated, or press Enter for none):',
+            default: '',
+        });
+    }
+    
+    // Only prompt if there are questions to ask
+    if (questions.length > 0) {
+        console.log('🎨 Animation Generator');
+        console.log('===================\n');
+        
+        const answers = await inquirer.prompt(questions);
+        
+        // Merge answers with existing options
+        return {
+            name: options.name || answers.name,
+            type: options.type || answers.type,
+            params: options.params || (answers.paramInput 
+                ? answers.paramInput.split(',').map(p => p.trim()).filter(p => p)
+                : []),
+        };
+    }
+    
+    return options;
+}
+
+async function main() {
+    const program = new Command();
+    
+    program
+        .name('new-animation')
+        .description('Create new animation components')
+        .option('-n, --name <name>', 'animation name')
+        .option('-t, --type <type>', 'animation type (shader, 2d, canvas, 1, 2)')
+        .option('-p, --params <params>', 'comma-separated parameter names')
+        .parse();
+
+    let options = program.opts();
+    
+    // Parse and validate type if provided
+    if (options.type) {
+        const typeMap = {
+            'shader': 'shader',
+            '1': 'shader',
+            '2d': '2d',
+            'canvas': '2d',
+            '2': '2d'
+        };
+        
+        const type = typeMap[options.type.toLowerCase()];
+        if (!type) {
+            console.error('❌ Invalid type. Use "shader", "2d", "canvas", "1", or "2"');
+            process.exit(1);
+        }
+        options.type = type;
+    }
+    
+    // Parse parameters if provided
+    if (options.params) {
+        options.params = options.params.split(',').map(p => p.trim()).filter(p => p);
+    }
+    
+    // Prompt for any missing options
+    options = await promptForMissing(options);
+    
+    // Check for existing files and handle overwrite
+    const camelName = toCamelCase(options.name);
+    const animationFile = path.join(__dirname, '..', 'src', 'animations', `${camelName}.tsx`);
+    const shaderFile = path.join(__dirname, '..', 'src', 'animations', 'shaders', `${camelName}.glsl`);
+    
+    const existingFiles = [];
+    if (fs.existsSync(animationFile)) existingFiles.push(`${camelName}.tsx`);
+    if (options.type === 'shader' && fs.existsSync(shaderFile)) existingFiles.push(`${camelName}.glsl`);
+    
+    if (existingFiles.length > 0) {
+        const { overwrite } = await inquirer.prompt([{
+            type: 'confirm',
+            name: 'overwrite',
+            message: `Files already exist: ${existingFiles.join(', ')}. Overwrite?`,
+            default: false,
+        }]);
+        
+        if (!overwrite) {
+            console.log('❌ Cancelled');
+            process.exit(0);
+        }
+        
+        // Remove existing files
+        existingFiles.forEach(file => {
+            const fullPath = file.endsWith('.glsl') ? shaderFile : animationFile;
+            if (fs.existsSync(fullPath)) {
+                fs.unlinkSync(fullPath);
+            }
+        });
+    }
+    
+    // Create the animation
+    try {
+        await createAnimation({
+            name: options.name,
+            type: options.type,
+            params: options.params,
+        });
+    } catch (error) {
+        console.error('❌ Error:', error.message);
+        process.exit(1);
+    }
 }
 
 main().catch(console.error);
