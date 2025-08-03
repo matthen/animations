@@ -172,6 +172,7 @@ namespace Graphics {
         xmax: number;
         ymin: number;
         ymax: number;
+        backgroundColor?: string;
     };
 
     export const draw = (
@@ -187,6 +188,14 @@ namespace Graphics {
             ctx.save();
             // compute scale and translation
             if (depth === undefined) {
+                // Handle background color if specified
+                if (options.backgroundColor) {
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    const originalFillStyle = ctx.fillStyle;
+                    ctx.fillStyle = options.backgroundColor;
+                    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    ctx.fillStyle = originalFillStyle;
+                }
                 ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
                 ctx.scale(
                     ctx.canvas.width / (options.xmax - options.xmin),

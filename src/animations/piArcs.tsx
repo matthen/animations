@@ -57,9 +57,6 @@ const PiArcs = () => {
         const ctx = canvas.getContext('2d')!;
 
         const drawFn: DrawFn = ({ t, arc, next, index, zoom, centreX, centreY }: DrawArgs) => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = bgColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const digit = Number(Utils.piDigits[index]);
             const even = index % 2 == 0;
@@ -122,7 +119,7 @@ const PiArcs = () => {
                     }),
                     piStrings.map((str, i) => Graphics.Text({ at: [24, 230 - i * 28], text: str })),
                 ],
-                { xmin: 0, ymin: 0, xmax: canvasWidth, ymax: canvasHeight },
+                { xmin: 0, ymin: 0, xmax: canvasWidth, ymax: canvasHeight, backgroundColor: bgColor },
                 ctx,
             );
 
@@ -229,6 +226,7 @@ const PiArcs = () => {
                     xmax: centreX + zoom,
                     ymin: centreY - zoom,
                     ymax: centreY + zoom,
+                    backgroundColor: bgColor,
                 },
                 ctx,
             );
