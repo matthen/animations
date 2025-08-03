@@ -21,26 +21,18 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v2
 
-            # setup nodejs environment
-            - name: Setup Node.js environment
-              uses: actions/setup-node@v2.1.5
-              with:
-                  node-version: '18.16.1'
-
             # setup pnpm
             - name: Setup pnpm
               uses: pnpm/action-setup@v2
               with:
                   version: 8
 
-            # cache the dependencies to speed up the build
-            - name: Cache dependencies
-              uses: actions/cache@v4
+            # setup nodejs environment
+            - name: Setup Node.js environment
+              uses: actions/setup-node@v4
               with:
-                  path: ~/.pnpm-store
-                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
+                  node-version: 20
+                  cache: 'pnpm'
 
             # install dependencies
             - name: Install dependencies
