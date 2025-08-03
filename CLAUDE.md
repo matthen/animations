@@ -22,6 +22,7 @@ This project uses **pnpm** (not npm). Always use `pnpm` commands.
 ### Core Components
 - **Animation Component** (`src/lib/Animation.tsx`): Main wrapper providing playback controls, parameter sliders, canvas resizing, and export functionality
 - **Graphics Library** (`src/lib/graphics.ts`): Canvas 2D drawing utilities with coordinate system management and drawing primitives
+  - **IMPORTANT**: When adding or editing functions in `graphics.ts`, always update the "Available Graphics Commands" section in `README.md` to keep the documentation in sync
 - **Utils** (`src/lib/utils.ts`): Shared utilities including transition functions
 
 ### Animation Structure
