@@ -12,7 +12,18 @@ This is a collection of mathematical animations, written as small React componen
 
 ## Creating an animation
 
-Todo
+Use the interactive animation generator:
+
+```bash
+pnpm new-animation
+```
+
+This will prompt you to:
+1. Choose animation name
+2. Select type (shader or 2D canvas)
+3. Define parameters (all default to 0-1 range)
+
+The script generates all necessary files with proper templates and TODO comments to guide implementation.
 
 ## Using `Graphics`
 

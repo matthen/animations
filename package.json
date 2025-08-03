@@ -25,7 +25,8 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "react-app-rewired build"
+    "build": "react-app-rewired build",
+    "new-animation": "node scripts/new-animation.js"
   },
   "eslintConfig": {
     "extends": [
@@ -54,7 +55,7 @@
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
     "prettier": "^2.8.8",
-    "prettier-plugin-tailwindcss": "^0.2.8",
+    "prettier-plugin-tailwindcss": "^0.5.7",
     "raw-loader": "^4.0.2",
     "react-app-rewired": "^2.2.1",
     "tailwind-dracula": "^1.1.0",
