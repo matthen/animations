@@ -12,6 +12,10 @@ const Anaglyph = () => {
     const canvasWidth = 768;
     const canvasHeight = 768;
 
+    const defaultNoiseAmount = 0.2;
+    const defaultContrast = 0.3;
+    const defaultMessageStrength = 0.9;
+
     const parameters: Parameter[] = [
         {
             name: 'redness',
@@ -28,12 +32,36 @@ const Anaglyph = () => {
                 },
             ]),
         },
+        {
+            name: 'noiseAmount',
+            minValue: 0,
+            maxValue: 2,
+            defaultValue: defaultNoiseAmount,
+        },
+        {
+            name: 'contrast',
+            minValue: 0,
+            maxValue: 1,
+            defaultValue: defaultContrast,
+        },
+        {
+            name: 'messageStrength',
+            minValue: 0,
+            maxValue: 1,
+            defaultValue: defaultMessageStrength,
+        },
     ];
 
     const makeDrawFn: MakeDrawFn = (canvas) => {
         const texLoader = new TextureLoader();
         let u_tex0 = texLoader.load('/animations/images/butterfly-text.png', () => {
-            drawFn({ t: 0, redness: 0 });
+            drawFn({
+                t: 0,
+                redness: 0,
+                noiseAmount: defaultNoiseAmount,
+                contrast: defaultContrast,
+                messageStrength: defaultMessageStrength,
+            });
         });
         u_tex0.generateMipmaps = false;
         u_tex0.wrapS = RepeatWrapping;
@@ -41,15 +69,24 @@ const Anaglyph = () => {
         const renderer = new WebGLRenderer({
             canvas,
         });
-        let pipeline = new GlslPipeline(renderer, { u_redness: { value: 0 }, u_tex0: { type: 't', value: u_tex0 } });
+        let pipeline = new GlslPipeline(renderer, {
+            u_tex0: { type: 't', value: u_tex0 },
+            u_redness: { value: 0 },
+            u_noiseAmount: { value: defaultNoiseAmount },
+            u_contrast: { value: defaultContrast },
+            u_messageStrength: { value: defaultMessageStrength },
+        });
         pipeline.load(shader);
         Utils.resetGlslPipeline(pipeline);
 
-        const drawFn: DrawFn = ({ t, redness }: DrawArgs) => {
+        const drawFn: DrawFn = ({ t, redness, contrast, noiseAmount, messageStrength }: DrawArgs) => {
             if (t == 0) {
                 Utils.resetGlslPipeline(pipeline);
             }
             pipeline.uniforms.u_redness.value = redness;
+            pipeline.uniforms.u_contrast.value = contrast;
+            pipeline.uniforms.u_noiseAmount.value = noiseAmount;
+            pipeline.uniforms.u_messageStrength.value = messageStrength;
             pipeline.renderMain();
         };
 

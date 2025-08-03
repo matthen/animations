@@ -1,5 +1,10 @@
-uniform vec2 u_resolution;
 uniform float u_redness;
+uniform float u_noiseAmount;
+uniform float u_contrast;
+uniform float u_messageStrength;
+
+
+uniform vec2 u_resolution;
 uniform sampler2D u_tex0;
 
 mat2 rotationMatrix(float angle) {
@@ -19,10 +24,10 @@ float hash12(vec2 p) {
     return fract((p3.x + p3.y) * p3.z);
 }
 
-float dist(vec2 uv) {
+float butterflyShapeDist(vec2 uv) {
     uv -= 0.5;
     uv *= rotationMatrix(0.3);
-    uv *= 2.;
+    uv *= 3.;
     uv += vec2(0.2, 0.3);
     uv.x = max(uv.x, -uv.x);
     vec2 p = uv * 20.0;
@@ -51,27 +56,43 @@ void main() {
     float message = 0.;
 
     // Add the text
-    message = mix(message, 0.9, smoothstep(0., pixel.x, 1. - butterflyText));
+    message = mix(message, 1.0, smoothstep(0., pixel.x, 1. - butterflyText));
 
     // Add outside of butterfly
-    message = mix(message, 0.7, smoothstep(0., pixel.x, dist(uvI)));
+    message = mix(message, 1.0, smoothstep(0., pixel.x, butterflyShapeDist(uvI)));
 
     // Subtract inside of butterfly
-    message = mix(0.1, message, smoothstep(0., pixel.x, 2. - dist(uvI)));
+    message = mix(0.0, message, smoothstep(0., pixel.x, 1.6 - butterflyShapeDist(uvI)));
 
     // Add noise
-    message = mix(message, 0.8, smoothstep(0.0, 1.5, hash12(uvI * u_resolution.xy)));
+    message = message + u_noiseAmount * hash12(uvI * u_resolution.xy);
+    message /= (1.0 + u_noiseAmount);
 
-    message = 1. - 0.6 * message;
+    message = u_messageStrength * message;
+    message = 1. - message;
+
+    // Message is now 0 for butterfly and text, 1 for outside.
 
     // Start as noise
-    vec3 color = hash32(uvI * u_resolution.xy);
-    // combine random color with the message.
-    color.r = mix(clamp(color.r, 0.7, 1.0), 0.2 * color.r, message);
-    color = mix(color, vec3(1.0, 0, 0) * color, u_redness);
-    color.g *= 0.5;  // Reduce green.
+    vec3 colorMoreRed = hash32(uvI * u_resolution.xy);
+    colorMoreRed.r = max(colorMoreRed.r, 0.5 + 0.5 * u_contrast);
+    
+    vec3 colorLessRed = hash32(uvI * u_resolution.xy);
+    colorLessRed.r = min(colorLessRed.r, 0.5 - 0.5 * u_contrast);
 
-    // color = vec3(message);
+    // combine random color with the message.
+    vec3 color = mix(
+        colorMoreRed,
+        colorLessRed,
+        message    
+    );
+
+
+    color = mix(color, vec3(1.0, 0, 0) * color, u_redness);
+
+    color.g *= 0.5;  // Reduce green.
+   
+
     gl_FragColor = vec4(color, 1.0);
 
 }
