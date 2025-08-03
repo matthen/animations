@@ -27,21 +27,27 @@ jobs:
               with:
                   node-version: '18.16.1'
 
+            # setup pnpm
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+
             # cache the dependencies to speed up the build
             - name: Cache dependencies
               uses: actions/cache@v4
               with:
-                  path: ~/.npm
-                  key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+                  path: ~/.pnpm-store
+                  key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
                   restore-keys: |
-                      ${{ runner.os }}-node-
+                      ${{ runner.os }}-pnpm-
 
             # install dependencies
             - name: Install dependencies
-              run: npm i
+              run: pnpm install
 
             - name: Build
-              run: npm run build
+              run: pnpm run build
 
             - name: Upload Pages artifact
               uses: actions/upload-pages-artifact@v3

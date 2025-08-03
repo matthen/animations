@@ -54,7 +54,7 @@
     "@types/webpack-env": "^1.18.8",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
-    "prettier": "^2.8.8",
+    "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.5.7",
     "raw-loader": "^4.0.2",
     "react-app-rewired": "^2.2.1",
