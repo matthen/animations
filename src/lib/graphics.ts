@@ -148,6 +148,23 @@ namespace Graphics {
         };
     };
 
+    export const Scale = ({
+        center,
+        scaleX,
+        scaleY,
+    }: {
+        center: number[];
+        scaleX: number;
+        scaleY: number;
+    }): DrawCommand => {
+        return (ctx) => {
+            const [cx, cy] = center;
+            ctx.translate(cx, -cy);
+            ctx.scale(scaleX, scaleY);
+            ctx.translate(-cx, cy);
+        };
+    };
+
     type DrawCommands = DrawCommand | DrawCommands[];
 
     type DrawOptions = {

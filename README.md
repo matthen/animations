@@ -115,6 +115,7 @@ Graphics.draw(
 **Transformations:**
 - `Graphics.Rotate()` - Rotate around a center point
 - `Graphics.Translate()` - Translate by offset
+- `Graphics.Scale()` - Scale around a center point
 
 **Styling:**
 - `Graphics.Set()` - Set canvas properties (colors, line width, etc.)
