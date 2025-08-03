@@ -2,7 +2,7 @@
 import { GlslPipeline } from 'glsl-pipeline';
 import { WebGLRenderer } from 'three';
 
-import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';
+import { Animation, DrawArgs, MakeDrawFn, ParameterConfig } from 'lib/Animation';
 import Utils from 'lib/utils';
 
 import shader from './shaders/noiseDodecahedron.glsl';
@@ -13,12 +13,11 @@ const NoiseDodecahedron = () => {
     const canvasWidth = 768;
     const canvasHeight = 768;
 
-    const parameters: Parameter[] = [
-        {
-            name: 'theta_1',
-            minValue: 0,
-            maxValue: 2 * Math.PI,
-            defaultValue: 0,
+    const parameters = {
+        theta_1: {
+            min: 0,
+            max: 2 * Math.PI,
+            default: 0,
             compute: Utils.makeTransitionFunction([
                 {
                     easing: 'linear',
@@ -29,11 +28,10 @@ const NoiseDodecahedron = () => {
                 },
             ]),
         },
-        {
-            name: 'theta_2',
-            minValue: 0,
-            maxValue: 2 * Math.PI,
-            defaultValue: 0,
+        theta_2: {
+            min: 0,
+            max: 2 * Math.PI,
+            default: 0,
             compute: Utils.makeTransitionFunction([
                 {
                     easing: 'linear',
@@ -44,9 +42,9 @@ const NoiseDodecahedron = () => {
                 },
             ]),
         },
-    ];
+    } as const satisfies ParameterConfig;
 
-    const makeDrawFn: MakeDrawFn = (canvas) => {
+    const makeDrawFn: MakeDrawFn<typeof parameters> = (canvas) => {
         const renderer = new WebGLRenderer({
             canvas,
         });
@@ -60,7 +58,7 @@ const NoiseDodecahedron = () => {
         pipeline.renderMain();
         let lastUpdate = -1;
 
-        const drawFn: DrawFn = ({ t, theta_1, theta_2 }: DrawArgs) => {
+        const drawFn = ({ t, theta_1, theta_2 }: DrawArgs<typeof parameters>) => {
             if (t == 0) {
                 Utils.resetGlslPipeline(pipeline);
                 lastUpdate = -1;

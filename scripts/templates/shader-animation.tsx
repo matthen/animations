@@ -2,7 +2,7 @@
 import { GlslPipeline } from 'glsl-pipeline';
 import { WebGLRenderer } from 'three';
 
-import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';
+import { Animation, DrawArgs, MakeDrawFn, ParameterConfig } from 'lib/Animation';
 import Utils from 'lib/utils';
 
 import shader from './shaders/{{CAMEL_NAME}}.glsl';
@@ -12,11 +12,11 @@ const {{PASCAL_NAME}} = () => {
     const canvasWidth = 768;
     const canvasHeight = 768;
 
-    const parameters: Parameter[] = [
+    const parameters = {
 {{PARAMETER_DEFINITIONS}}
-    ];
+    } as const satisfies ParameterConfig;
 
-    const makeDrawFn: MakeDrawFn = (canvas) => {
+    const makeDrawFn: MakeDrawFn<typeof parameters> = (canvas) => {
         const renderer = new WebGLRenderer({
             canvas,
         });
@@ -24,7 +24,7 @@ const {{PASCAL_NAME}} = () => {
         pipeline.load(shader);
         pipeline.renderMain();
 
-        const drawFn: DrawFn = ({{DRAW_ARGS_TYPE}}: DrawArgs) => {
+        const drawFn = ({{DRAW_ARGS_TYPE}}: DrawArgs<typeof parameters>) => {
             if (t == 0) {
                 Utils.resetGlslPipeline(pipeline);
             }

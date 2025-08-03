@@ -50,7 +50,7 @@ function createShaderAnimationTemplate(name, parameters) {
     const camelName = toCamelCase(name);
 
     const parameterDefinitions = parameters
-        .map((param) => `        { name: '${param}', minValue: 0, maxValue: 1, defaultValue: 0.5 },`)
+        .map((param) => `        ${param}: { min: 0, max: 1, default: 0.5 },`)
         .join('\n');
     const uniformsObject = `{ u_t: { value: 0 }${parameters.length > 0 ? ', ' : ''}${parameters
         .map((p) => `u_${p}: { value: 0 }`)
@@ -77,7 +77,7 @@ function create2DAnimationTemplate(name, parameters) {
     const pascalName = toPascalCase(name);
 
     const parameterDefinitions = parameters
-        .map((param) => `        { name: '${param}', minValue: 0, maxValue: 1, defaultValue: 0.5 },`)
+        .map((param) => `        ${param}: { min: 0, max: 1, default: 0.5 },`)
         .join('\n');
     const drawArgsType = `{ ${parameters.join(', ')} }`;
     const parameterComments = parameters.join(', ');

@@ -1,4 +1,4 @@
-import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';
+import { Animation, DrawArgs, MakeDrawFn, ParameterConfig } from 'lib/Animation';
 import Graphics from 'lib/graphics';
 import Utils from 'lib/utils';
 
@@ -7,30 +7,28 @@ const Hypocycloids = () => {
     const canvasWidth = 1024;
     const canvasHeight = 1024;
 
-    const parameters: Parameter[] = [
-        {
-            name: 'theta',
-            minValue: 0,
-            maxValue: 4 * Math.PI,
+    const parameters = {
+        theta: {
+            min: 0,
+            max: 4 * Math.PI,
             // Start and end at 4 * Math.PI, linear between 4 and duration - 4 seconds.
-            compute: (t) =>
+            compute: (t: number) =>
                 (4 * Math.PI * (Utils.smoothstepI(t, 0, 4) - Utils.smoothstepI(t, duration - 4, duration))) /
                 (duration - 4),
             step: 0.01,
         },
-        {
-            name: 'n',
-            minValue: 2,
-            maxValue: 16,
-            defaultValue: 3,
+        n: {
+            min: 2,
+            max: 16,
+            default: 3,
             step: 1,
         },
-    ];
+    } as const satisfies ParameterConfig;
 
-    const makeDrawFn: MakeDrawFn = (canvas) => {
+    const makeDrawFn: MakeDrawFn<typeof parameters> = (canvas) => {
         const ctx = canvas.getContext('2d')!;
 
-        const drawFn: DrawFn = ({ theta, n }: DrawArgs) => {
+        const drawFn = ({ theta, n }: DrawArgs<typeof parameters>) => {
             theta = Math.min(theta, 4 * Math.PI - 1e-5);
             const r = 1 / n;
             const inFirstHalf = theta < 2 * Math.PI;

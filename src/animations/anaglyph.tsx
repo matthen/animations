@@ -2,7 +2,7 @@
 import { GlslPipeline } from 'glsl-pipeline';
 import { RepeatWrapping, TextureLoader, WebGLRenderer } from 'three';
 
-import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';
+import { Animation, DrawArgs, MakeDrawFn, ParameterConfig } from 'lib/Animation';
 import Utils from 'lib/utils';
 
 import shader from './shaders/anaglyph.glsl';
@@ -16,12 +16,11 @@ const Anaglyph = () => {
     const defaultContrast = 0.3;
     const defaultMessageStrength = 0.9;
 
-    const parameters: Parameter[] = [
-        {
-            name: 'redness',
-            minValue: 0,
-            maxValue: 1,
-            defaultValue: 0,
+    const parameters = {
+        redness: {
+            min: 0,
+            max: 1,
+            default: 0,
             compute: Utils.makeTransitionFunction([
                 {
                     easing: 'smoothstep',
@@ -32,27 +31,24 @@ const Anaglyph = () => {
                 },
             ]),
         },
-        {
-            name: 'noiseAmount',
-            minValue: 0,
-            maxValue: 2,
-            defaultValue: defaultNoiseAmount,
+        noiseAmount: {
+            min: 0,
+            max: 2,
+            default: defaultNoiseAmount,
         },
-        {
-            name: 'contrast',
-            minValue: 0,
-            maxValue: 1,
-            defaultValue: defaultContrast,
+        contrast: {
+            min: 0,
+            max: 1,
+            default: defaultContrast,
         },
-        {
-            name: 'messageStrength',
-            minValue: 0,
-            maxValue: 1,
-            defaultValue: defaultMessageStrength,
+        messageStrength: {
+            min: 0,
+            max: 1,
+            default: defaultMessageStrength,
         },
-    ];
+    } as const satisfies ParameterConfig;
 
-    const makeDrawFn: MakeDrawFn = (canvas) => {
+    const makeDrawFn: MakeDrawFn<typeof parameters> = (canvas) => {
         const texLoader = new TextureLoader();
         let u_tex0 = texLoader.load('/animations/images/butterfly-text.png', () => {
             drawFn({
@@ -79,7 +75,7 @@ const Anaglyph = () => {
         pipeline.load(shader);
         Utils.resetGlslPipeline(pipeline);
 
-        const drawFn: DrawFn = ({ t, redness, contrast, noiseAmount, messageStrength }: DrawArgs) => {
+        const drawFn = ({ t, redness, contrast, noiseAmount, messageStrength }: DrawArgs<typeof parameters>) => {
             if (t == 0) {
                 Utils.resetGlslPipeline(pipeline);
             }

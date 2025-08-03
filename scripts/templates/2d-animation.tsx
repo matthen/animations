@@ -1,4 +1,4 @@
-import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';
+import { Animation, DrawArgs, MakeDrawFn, ParameterConfig } from 'lib/Animation';
 import Graphics from 'lib/graphics';
 import Utils from 'lib/utils';
 
@@ -7,17 +7,14 @@ const {{PASCAL_NAME}} = () => {
     const canvasWidth = 768;
     const canvasHeight = 768;
 
-    const parameters: Parameter[] = [
+    const parameters = {
 {{PARAMETER_DEFINITIONS}}
-    ];
+    } as const satisfies ParameterConfig;
 
-    const makeDrawFn: MakeDrawFn = (canvas) => {
+    const makeDrawFn: MakeDrawFn<typeof parameters> = (canvas) => {
         const ctx = canvas.getContext('2d')!;
 
-        const drawFn: DrawFn = ({{DRAW_ARGS_TYPE}}: DrawArgs) => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#020115';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const drawFn = ({{DRAW_ARGS_TYPE}}: DrawArgs<typeof parameters>) => {
 
             Graphics.draw(
                 [
@@ -31,6 +28,7 @@ const {{PASCAL_NAME}} = () => {
                     xmax: 1.1,
                     ymin: -1.1,
                     ymax: 1.1,
+                    backgroundColor: '#020115',
                 },
                 ctx,
             );

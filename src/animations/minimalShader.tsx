@@ -2,7 +2,7 @@
 import { GlslPipeline } from 'glsl-pipeline';
 import { WebGLRenderer } from 'three';
 
-import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';
+import { Animation, DrawArgs, MakeDrawFn, ParameterConfig } from 'lib/Animation';
 import Utils from 'lib/utils';
 
 import shader from './shaders/minimalShader.glsl';
@@ -12,9 +12,9 @@ const MinimalShader = () => {
     const canvasWidth = 768;
     const canvasHeight = 768;
 
-    const parameters: Parameter[] = [{ name: 'speed', minValue: 0, maxValue: 10, defaultValue: 1 }];
+    const parameters = { speed: { min: 0, max: 10, default: 1 } } as const satisfies ParameterConfig;
 
-    const makeDrawFn: MakeDrawFn = (canvas) => {
+    const makeDrawFn: MakeDrawFn<typeof parameters> = (canvas) => {
         const renderer = new WebGLRenderer({
             canvas,
         });
@@ -22,7 +22,7 @@ const MinimalShader = () => {
         pipeline.load(shader);
         pipeline.renderMain();
 
-        const drawFn: DrawFn = ({ t, speed }: DrawArgs) => {
+        const drawFn = ({ t, speed }: DrawArgs<typeof parameters>) => {
             if (t == 0) {
                 Utils.resetGlslPipeline(pipeline);
             }

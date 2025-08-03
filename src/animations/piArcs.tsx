@@ -1,6 +1,6 @@
 import chroma from 'chroma-js';
 
-import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';
+import { Animation, DrawArgs, MakeDrawFn, ParameterConfig } from 'lib/Animation';
 import Graphics from 'lib/graphics';
 import Utils from 'lib/utils';
 
@@ -18,45 +18,41 @@ const PiArcs = () => {
         10 * Utils.smoothstepI(t, 20, 40) -
         13 * Utils.smoothstepI(t, duration - 3.5, duration - 0.5);
 
-    const parameters: Parameter[] = [
-        {
-            name: 'arc',
-            minValue: 0,
-            maxValue: 1,
+    const parameters = {
+        arc: {
+            min: 0,
+            max: 1,
             step: 0.01,
-            compute: (t) => Utils.smoothstep(Utils.frac(tt(t)), 0, 0.5),
+            compute: (t: number) => Utils.smoothstep(Utils.frac(tt(t)), 0, 0.5),
         },
-        {
-            name: 'next',
-            minValue: 0,
-            maxValue: 1,
+        next: {
+            min: 0,
+            max: 1,
             step: 0.01,
-            compute: (t) => Utils.smoothstep(Utils.frac(tt(t)), 0.5, 1.0),
+            compute: (t: number) => Utils.smoothstep(Utils.frac(tt(t)), 0.5, 1.0),
         },
-        { name: 'index', minValue: 0, maxValue: Utils.piDigits.length - 1, step: 1, compute: (t) => Math.floor(tt(t)) },
+        index: { min: 0, max: Utils.piDigits.length - 1, step: 1, compute: (t: number) => Math.floor(tt(t)) },
 
-        {
-            name: 'zoom',
-            minValue: 1,
-            maxValue: 100,
+        zoom: {
+            min: 1,
+            max: 100,
             step: 0.01,
-            compute: (t) => 2.4 + 8 * Utils.smoothstep(tt(t), 1, 14) + tt(t) * 0.1,
+            compute: (t: number) => 2.4 + 8 * Utils.smoothstep(tt(t), 1, 14) + tt(t) * 0.1,
         },
 
-        { name: 'centreX', minValue: -20, maxValue: 20, compute: (t) => 0.7 + 4 * Utils.smoothstep(tt(t), 1, 14) },
-        {
-            name: 'centreY',
-            minValue: -20,
-            maxValue: 20,
-            compute: (t) => -0.8 + 7 * Utils.smoothstep(tt(t), 1, 14) + 0.015 * Utils.smoothstepI(tt(t), 14, 30),
+        centreX: { min: -20, max: 20, compute: (t: number) => 0.7 + 4 * Utils.smoothstep(tt(t), 1, 14) },
+        centreY: {
+            min: -20,
+            max: 20,
+            compute: (t: number) => -0.8 + 7 * Utils.smoothstep(tt(t), 1, 14) + 0.015 * Utils.smoothstepI(tt(t), 14, 30),
         },
-    ];
+    } as const satisfies ParameterConfig;
     const pyByFive = Math.PI / 5;
 
-    const makeDrawFn: MakeDrawFn = (canvas) => {
+    const makeDrawFn: MakeDrawFn<typeof parameters> = (canvas) => {
         const ctx = canvas.getContext('2d')!;
 
-        const drawFn: DrawFn = ({ t, arc, next, index, zoom, centreX, centreY }: DrawArgs) => {
+        const drawFn = ({ t, arc, next, index, zoom, centreX, centreY }: DrawArgs<typeof parameters>) => {
 
             const digit = Number(Utils.piDigits[index]);
             const even = index % 2 == 0;

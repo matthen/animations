@@ -2,7 +2,7 @@
 import { GlslPipeline } from 'glsl-pipeline';
 import { RepeatWrapping, TextureLoader, WebGLRenderer } from 'three';
 
-import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';
+import { Animation, DrawArgs, MakeDrawFn, ParameterConfig } from 'lib/Animation';
 import Utils from 'lib/utils';
 
 import shader from './shaders/dither.glsl';
@@ -12,9 +12,9 @@ const Dither = () => {
     const canvasWidth = 768;
     const canvasHeight = 768;
 
-    const parameters: Parameter[] = [];
+    const parameters = {} as const satisfies ParameterConfig;
 
-    const makeDrawFn: MakeDrawFn = (canvas) => {
+    const makeDrawFn: MakeDrawFn<typeof parameters> = (canvas) => {
         const texLoader = new TextureLoader();
         let u_tex0 = texLoader.load('/animations/images/cat.jpg', () => {
             drawFn({ t: 0 });
@@ -33,7 +33,7 @@ const Dither = () => {
         pipeline.load(shader);
         Utils.resetGlslPipeline(pipeline);
 
-        const drawFn: DrawFn = ({ t }: DrawArgs) => {
+        const drawFn = ({ t }: DrawArgs<typeof parameters>) => {
             if (t == 0) {
                 Utils.resetGlslPipeline(pipeline);
             }

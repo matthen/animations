@@ -1,4 +1,4 @@
-import { Animation, DrawArgs, DrawFn, MakeDrawFn, Parameter } from 'lib/Animation';
+import { Animation, DrawArgs, MakeDrawFn, ParameterConfig } from 'lib/Animation';
 import Graphics from 'lib/graphics';
 import Utils from 'lib/utils';
 
@@ -7,11 +7,11 @@ const Minimal2D = () => {
     const canvasWidth = 768;
     const canvasHeight = 768;
 
-    const parameters: Parameter[] = [
-        {
-            name: 'r',
-            minValue: 0.005,
-            maxValue: 1,
+    // New type-safe parameter definition
+    const parameters = {
+        r: {
+            min: 0.005,
+            max: 1,
             compute: Utils.makeTransitionFunction([
                 {
                     easing: 'smoothstep',
@@ -29,12 +29,12 @@ const Minimal2D = () => {
             ]),
             step: 0.005,
         },
-    ];
+    } as const satisfies ParameterConfig;
 
-    const makeDrawFn: MakeDrawFn = (canvas) => {
+    const makeDrawFn: MakeDrawFn<typeof parameters> = (canvas) => {
         const ctx = canvas.getContext('2d')!;
 
-        const drawFn: DrawFn = ({ r }: DrawArgs) => {
+        const drawFn = ({ r }: DrawArgs<typeof parameters>) => {
 
             Graphics.draw(
                 [

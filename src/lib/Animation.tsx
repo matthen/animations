@@ -1,28 +1,38 @@
 import React from 'react';
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { IconContext } from 'react-icons';
 import { FaLock, FaLockOpen, FaPause, FaPlay, FaStepBackward } from 'react-icons/fa';
 import { useDebouncedCallback } from 'use-debounce';
 
-export type DrawArgs = Record<string, number> & { t: number };
-export type DrawFn = (args: DrawArgs) => void;
-export type MakeDrawFn = (canvas: HTMLCanvasElement) => DrawFn;
-export interface Parameter {
-    name: string;
-    compute?: (t: number) => number;
-    defaultValue?: number;
-    minValue: number;
-    maxValue: number;
+// Type-safe parameter system
+export interface ParameterDef {
+    min: number;
+    max: number;
+    default?: number;
     step?: number;
+    compute?: (t: number) => number;
 }
 
-interface AnimationOptions {
+export type ParameterConfig = Record<string, ParameterDef>;
+
+// Infer DrawArgs type from parameter config
+export type DrawArgs<T extends ParameterConfig> = {
+    t: number;
+} & {
+    [K in keyof T]: number;
+};
+
+// Type-safe function types
+export type DrawFn<T extends ParameterConfig> = (args: DrawArgs<T>) => void;
+export type MakeDrawFn<T extends ParameterConfig> = (canvas: HTMLCanvasElement) => DrawFn<T>;
+
+export interface AnimationOptions<T extends ParameterConfig> {
     duration: number;
     initialCanvasWidth: number;
     initialCanvasHeight: number;
     pixelRatio?: number;
-    makeDrawFn: MakeDrawFn;
-    parameters: Parameter[];
+    makeDrawFn: MakeDrawFn<T>;
+    parameters: T;
     enableTimeControl?: boolean;
 }
 
@@ -32,37 +42,37 @@ interface CanvasDims {
     arLocked: boolean; // Whether the aspect ratio is locked.
 }
 
-export const Animation = (props: AnimationOptions) => {
+export const Animation = <T extends ParameterConfig>(props: AnimationOptions<T>) => {
     const enableTimeControl = props.enableTimeControl === undefined ? true : props.enableTimeControl;
     const [canvasDims, setCanvasDims] = useState({
         width: props.initialCanvasWidth,
         height: props.initialCanvasHeight,
         arLocked: true,
     });
-    const [drawFn, setDrawFn] = useState<DrawFn | null>(null);
+    const [drawFn, setDrawFn] = useState<DrawFn<T> | null>(null);
     const [controlMode, setControlMode] = useState('user' as 'playing' | 'user' | 'recording');
     const computeParamValues = (t: number): Record<string, number> =>
         Object.fromEntries(
-            props.parameters
-                .filter((param) => param.compute !== undefined)
-                .map((param) => [param.name, param.compute!(t)]),
+            Object.entries(props.parameters)
+                .filter(([, def]) => def.compute !== undefined)
+                .map(([name, def]) => [name, def.compute!(t)]),
         );
-    const initialDrawArgs: DrawArgs = {
+    const initialDrawArgs: DrawArgs<T> = {
         t: 0,
         ...computeParamValues(0),
         ...Object.fromEntries(
-            props.parameters
-                .filter((param) => param.compute === undefined)
-                .map((param) => [param.name, param.defaultValue !== undefined ? param.defaultValue : param.minValue]),
+            Object.entries(props.parameters)
+                .filter(([, def]) => def.compute === undefined)
+                .map(([name, def]) => [name, def.default !== undefined ? def.default : def.min]),
         ),
-    };
-    const drawArgs = useRef<DrawArgs>(initialDrawArgs);
-    const lastDrawArgs = useRef<DrawArgs | null>(null);
+    } as DrawArgs<T>;
+    const drawArgs = useRef<DrawArgs<T>>(initialDrawArgs);
+    const lastDrawArgs = useRef<DrawArgs<T> | null>(null);
     const requestAnimationRef = useRef(0);
     const prevWindowTimeRef = useRef<null | number>(null);
     const frameTimes = useRef<number[]>([]); // Record how long frames are taking to draw for fps computations.
     const [fps, setFps] = useState(0.0);
-    const [drawArgsUI, setDrawArgsUI] = useState<DrawArgs>(initialDrawArgs);
+    const [drawArgsUI, setDrawArgsUI] = useState<DrawArgs<T>>(initialDrawArgs);
     const canvasElement = useRef<HTMLCanvasElement>();
     const CCaptureObj = useRef<any | null>();
 
@@ -197,8 +207,8 @@ export const Animation = (props: AnimationOptions) => {
 
     const pixelRatio = props.pixelRatio || window.devicePixelRatio;
 
-    const setParam = (value: number, param: Parameter): void => {
-        if (param.compute || controlMode == 'user') {
+    const setParam = (value: number, param: { name: string; def: ParameterDef }): void => {
+        if (param.def.compute || controlMode == 'user') {
             setDrawArgsUI((old) => {
                 return {
                     ...old,
@@ -206,16 +216,15 @@ export const Animation = (props: AnimationOptions) => {
                 };
             });
         } else {
-            drawArgs.current[param.name] = value;
+            (drawArgs.current as any)[param.name] = value;
         }
     };
 
-    const timeParameter: Parameter = {
-        name: 't',
+    const timeParameterDef: ParameterDef = {
         compute: (t) => t,
-        defaultValue: 0.0,
-        minValue: 0.0,
-        maxValue: props.duration,
+        default: 0.0,
+        min: 0.0,
+        max: props.duration,
         step: 0.01,
     };
 
@@ -266,7 +275,8 @@ export const Animation = (props: AnimationOptions) => {
                     </div>
                     <div className="mt-4 grid grid-cols-9 gap-2">
                         <ParamController
-                            param={timeParameter}
+                            name="t"
+                            def={timeParameterDef}
                             value={drawArgsUI.t}
                             onChange={(value) =>
                                 setDrawArgsUI((old) => {
@@ -296,16 +306,17 @@ export const Animation = (props: AnimationOptions) => {
                                 </button>
                             </div>
                         </ParamController>
-                        {props.parameters.map((param) => (
+                        {Object.entries(props.parameters).map(([name, def]) => (
                             <ParamController
-                                param={param}
-                                value={drawArgsUI[param.name]}
-                                disabled={param.compute !== undefined && controlMode != 'user'}
-                                onChange={(value) => setParam(value, param)}
-                                key={param.name}
+                                name={name}
+                                def={def}
+                                value={drawArgsUI[name as keyof DrawArgs<T>]}
+                                disabled={def.compute !== undefined && controlMode != 'user'}
+                                onChange={(value) => setParam(value, { name, def })}
+                                key={name}
                             >
                                 <div className="col-span-2 mt-1 pr-2 text-right text-sm">
-                                    <p>{param.name}</p>
+                                    <p>{name}</p>
                                 </div>
                             </ParamController>
                         ))}
@@ -390,27 +401,29 @@ const CanvasDimControls = ({
 
 const ParamController = ({
     children,
-    param,
+    name,
+    def,
     value,
     disabled,
     onChange,
 }: {
     children: React.ReactNode;
-    param: Parameter;
+    name: string;
+    def: ParameterDef;
     value: number;
     disabled: boolean;
     onChange: (value: number) => void;
 }) => {
     return (
-        <React.Fragment key={param.name}>
+        <React.Fragment key={name}>
             {children}
             <div className="col-span-5">
                 <input
                     type="range"
-                    min={param.minValue}
-                    max={param.maxValue}
+                    min={def.min}
+                    max={def.max}
                     value={value}
-                    step={param.step || 0.01}
+                    step={def.step || 0.01}
                     disabled={disabled}
                     className="h-2 w-full appearance-none rounded-lg bg-dark accent-pink"
                     onChange={(e) => onChange(Number(e.target.value))}
@@ -420,9 +433,9 @@ const ParamController = ({
                 <input
                     type="number"
                     min="0"
-                    max={param.maxValue}
+                    max={def.max}
                     value={value}
-                    step={param.step || 0.01}
+                    step={def.step || 0.01}
                     disabled={disabled}
                     className="ml-2 w-20 appearance-none rounded bg-dark px-2 py-1"
                     onChange={(e) => onChange(Number(e.target.value))}
@@ -432,10 +445,10 @@ const ParamController = ({
     );
 };
 
-const areDrawArgsEqual = (args1: DrawArgs, args2: DrawArgs): boolean => {
+const areDrawArgsEqual = <T extends ParameterConfig>(args1: DrawArgs<T>, args2: DrawArgs<T>): boolean => {
     const keys = Object.keys(args1);
     for (const key of keys) {
-        if (Math.abs(args1[key] - args2[key]) > 1e-5) {
+        if (Math.abs(args1[key as keyof DrawArgs<T>] - args2[key as keyof DrawArgs<T>]) > 1e-5) {
             return false;
         }
     }
