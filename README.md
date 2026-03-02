@@ -10,6 +10,31 @@ This is a collection of mathematical animations, written as small React componen
 -   [lib/Animation.tsx](src/lib/Animation.tsx) - react component for rendering and exporting animations
 -   [lib/graphics.ts](src/lib/graphics.ts) - library to simplify drawing to 2d canvas
 
+## Getting Started
+
+This project uses **pnpm** as the package manager.
+
+### Installation
+```bash
+pnpm install
+```
+
+### Development
+```bash
+# Start development server (runs on localhost:3000)
+pnpm start
+```
+
+The development server supports hot reloading - changes to animation code will automatically refresh in the browser.
+
+### Building for Production
+```bash
+# Create optimized production build
+pnpm build
+
+# The output will be in the build/ directory
+```
+
 ## Creating an animation
 
 Use the interactive animation generator:
