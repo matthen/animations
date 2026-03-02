@@ -17,6 +17,19 @@ This is a React-based mathematical animations project that creates interactive v
 ### Package Manager
 This project uses **pnpm** (not npm). Always use `pnpm` commands.
 
+## Collaborative Development
+
+### Playwright Integration
+Playwright is a useful way to work on animations with the user, as it allows you to see the screen through screenshots and interact with the running application. This enables you to:
+- Visually inspect animations as they run
+- Verify that changes produce the expected visual results
+- Debug rendering issues by seeing what's actually displayed
+
+The user can enable Playwright support with:
+```bash
+claude mcp add playwright npx '@playwright/mcp@latest'
+```
+
 ## Architecture
 
 ### Core Components
